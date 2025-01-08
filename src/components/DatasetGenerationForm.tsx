@@ -12,13 +12,27 @@ interface DatasetGenerationFormProps {
   onGenerate: (registrations: TimeRegistration[]) => void;
 }
 
+interface GenerateDatasetParams {
+  numEmployees: number;
+  startDate: string;
+  endDate: string;
+  projects: string[];
+  workCategories: string[];
+  departments: string[];
+  numRegistrationsPerEmployee: number;
+  workStartRange: number[];
+  workEndRange: number[];
+  breakDurationRange: number[];
+  skipWeekends: boolean;
+  randomizeAssignments: boolean;
+}
+
 // Get the Monday of the current week and format it as YYYY-MM-DD
 const getInitialStartDate = () => {
   const monday = startOfWeek(new Date(), { weekStartsOn: 1 });
   return format(monday, 'yyyy-MM-dd');
 };
 
-// Get the date one month after the start date
 const getInitialEndDate = () => {
   const monday = startOfWeek(new Date(), { weekStartsOn: 1 });
   const monthLater = addMonths(monday, 1);
