@@ -13,6 +13,12 @@ import {
 } from "date-fns";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 import { Button } from "./ui/button";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
 
 interface TimeRegistrationCalendarProps {
   registrations: TimeRegistration[];
@@ -58,6 +64,12 @@ export const TimeRegistrationCalendar = ({ registrations }: TimeRegistrationCale
     const newDate = new Date(selectedDate);
     newDate.setDate(newDate.getDate() + (direction === 'next' ? 28 : -28));
     setSelectedDate(newDate);
+  };
+
+  const getAnomalyDescription = (registration: TimeRegistration) => {
+    if (!registration.anomaly) return null;
+    const severity = registration.anomaly === 1 ? "Weak" : "Strong";
+    return `${severity} anomaly detected in: ${registration.anomalyField}`;
   };
 
   return (
@@ -135,19 +147,40 @@ export const TimeRegistrationCalendar = ({ registrations }: TimeRegistrationCale
                             }`}
                           >
                             <div className="flex flex-col gap-1">
-                              {dayRegistrations.map((registration, idx) => (
-                                <div 
-                                  key={registration.registrationId} 
-                                  className={`text-xs p-1 rounded bg-accent ${
-                                    idx > 0 ? 'mt-1' : ''
-                                  }`}
-                                >
-                                  <div>{registration.workDuration.toFixed(2)}h</div>
-                                  <div className="text-muted-foreground text-[10px]">
-                                    {registration.workCategory}
+                              {dayRegistrations.map((registration) => {
+                                const anomalyDescription = getAnomalyDescription(registration);
+                                const registrationContent = (
+                                  <div 
+                                    className={`text-xs p-1 rounded ${
+                                      registration.anomaly 
+                                        ? registration.anomaly === 1 
+                                          ? 'bg-yellow-200 dark:bg-yellow-900'
+                                          : 'bg-red-200 dark:bg-red-900'
+                                        : 'bg-accent'
+                                    }`}
+                                  >
+                                    <div>{registration.workDuration.toFixed(2)}h</div>
+                                    <div className="text-muted-foreground text-[10px]">
+                                      {registration.workCategory}
+                                    </div>
                                   </div>
-                                </div>
-                              ))}
+                                );
+
+                                return anomalyDescription ? (
+                                  <Tooltip key={registration.registrationId}>
+                                    <TooltipTrigger asChild>
+                                      {registrationContent}
+                                    </TooltipTrigger>
+                                    <TooltipContent>
+                                      <p>{anomalyDescription}</p>
+                                    </TooltipContent>
+                                  </Tooltip>
+                                ) : (
+                                  <div key={registration.registrationId}>
+                                    {registrationContent}
+                                  </div>
+                                );
+                              })}
                             </div>
                           </div>
                         );
