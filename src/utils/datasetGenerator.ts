@@ -119,19 +119,30 @@ export const generateDataset = (params: GenerateDatasetParams): GenerateDatasetR
     }
   }
 
-  const employeeWorkPatterns: EmployeeWorkPattern[] = [];
+  // Create a map to store work patterns by employee ID
+  const employeeWorkPatternsMap = new Map<string, EmployeeWorkPattern>();
+
+  // Generate or retrieve work patterns for each employee
   for (let empIdx = 0; empIdx < numEmployees; empIdx++) {
     const employeeId = `employee-${empIdx}`;
-    const workPattern = generateEmployeeWorkPattern(
-      employeeId,
-      workStartRange,
-      workEndRange,
-      departments,
-      workCategories
-    );
-    employeeWorkPatterns.push(workPattern);
+    
+    // Check if a pattern already exists for this employee
+    if (!employeeWorkPatternsMap.has(employeeId)) {
+      const workPattern = generateEmployeeWorkPattern(
+        employeeId,
+        workStartRange,
+        workEndRange,
+        departments,
+        workCategories
+      );
+      employeeWorkPatternsMap.set(employeeId, workPattern);
+    }
   }
 
+  // Convert the map to an array for the return value
+  const employeeWorkPatterns = Array.from(employeeWorkPatternsMap.values());
+
+  // Generate registrations using the stored patterns
   for (const workPattern of employeeWorkPatterns) {
     for (let i = 0; i < numRegistrationsPerEmployee; i++) {
       let date;
