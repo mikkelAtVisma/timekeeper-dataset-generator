@@ -1,12 +1,16 @@
 import { TableHead } from "@/components/ui/table";
 import { ArrowUpDown } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { TimeRegistration } from "../../types/timeRegistration";
 
 interface SortableTableHeaderProps {
   children: React.ReactNode;
-  field: string;
-  currentSort: { field: string; direction: 'asc' | 'desc' | null };
-  onSort: (field: string) => void;
+  field: keyof TimeRegistration;
+  currentSort: { 
+    field: keyof TimeRegistration | ''; 
+    direction: 'asc' | 'desc' | null 
+  };
+  onSort: (field: keyof TimeRegistration) => void;
 }
 
 export const SortableTableHeader = ({
@@ -26,7 +30,7 @@ export const SortableTableHeader = ({
           <div>{children}</div>
           <ArrowUpDown className={`ml-2 h-4 w-4 ${
             currentSort.field === field 
-              ? 'text-foreground' 
+              ? currentSort.direction ? 'text-foreground' : 'text-muted-foreground'
               : 'text-muted-foreground'
           }`} />
         </Button>

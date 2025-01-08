@@ -1,16 +1,15 @@
 import {
   Table,
-  TableBody,
-  TableCell,
   TableHead,
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { CircleAlert } from "lucide-react";
 import { TimeRegistration } from "../types/timeRegistration";
 import { useState, useMemo } from "react";
 import { TableFilters } from "./table/TableFilters";
 import { SortableTableHeader } from "./table/SortableTableHeader";
+import { TimeRegistrationTableBody } from "./table/TimeRegistrationTableBody";
+import { sortRegistrations } from "../utils/sortUtils";
 
 interface TimeRegistrationTableProps {
   registrations: TimeRegistration[];
@@ -29,7 +28,7 @@ export const TimeRegistrationTable = ({ registrations }: TimeRegistrationTablePr
   });
 
   const [sort, setSort] = useState<{
-    field: string;
+    field: keyof TimeRegistration | '';
     direction: 'asc' | 'desc' | null;
   }>({
     field: '',
@@ -48,7 +47,7 @@ export const TimeRegistrationTable = ({ registrations }: TimeRegistrationTablePr
     };
   }, [registrations]);
 
-  const handleSort = (field: string) => {
+  const handleSort = (field: keyof TimeRegistration) => {
     setSort(prev => ({
       field,
       direction: 
@@ -60,10 +59,6 @@ export const TimeRegistrationTable = ({ registrations }: TimeRegistrationTablePr
               : 'asc'
           : 'asc'
     }));
-  };
-
-  const isAnomalous = (reg: TimeRegistration) => {
-    return reg.anomaly && reg.anomaly > 0;
   };
 
   const handleFilterChange = (field: string, value: string) => {
@@ -89,24 +84,7 @@ export const TimeRegistrationTable = ({ registrations }: TimeRegistrationTablePr
       );
     });
 
-    if (sort.field && sort.direction) {
-      result = [...result].sort((a, b) => {
-        const aValue = a[sort.field as keyof TimeRegistration];
-        const bValue = b[sort.field as keyof TimeRegistration];
-        
-        if (typeof aValue === 'number' && typeof bValue === 'number') {
-          return sort.direction === 'asc' ? aValue - bValue : bValue - aValue;
-        }
-        
-        const aStr = String(aValue);
-        const bStr = String(bValue);
-        return sort.direction === 'asc' 
-          ? aStr.localeCompare(bStr)
-          : bStr.localeCompare(aStr);
-      });
-    }
-
-    return result;
+    return sortRegistrations(result, sort.field, sort.direction);
   }, [registrations, filters, sort]);
 
   return (
@@ -197,33 +175,7 @@ export const TimeRegistrationTable = ({ registrations }: TimeRegistrationTablePr
             </SortableTableHeader>
           </TableRow>
         </TableHeader>
-        <TableBody>
-          {filteredAndSortedRegistrations.map((reg) => (
-            <TableRow 
-              key={reg.registrationId}
-              className={isAnomalous(reg) ? "bg-red-50" : ""}
-            >
-              <TableCell>
-                {isAnomalous(reg) && (
-                  <div className="flex items-center gap-2">
-                    <CircleAlert className="h-4 w-4 text-[#ea384c]" />
-                    <span className="text-xs text-red-600">
-                      Anomaly in: {reg.anomalyField}
-                    </span>
-                  </div>
-                )}
-              </TableCell>
-              <TableCell>{reg.date}</TableCell>
-              <TableCell>{reg.employeeId}</TableCell>
-              <TableCell>{reg.projectId}</TableCell>
-              <TableCell>{reg.departmentId}</TableCell>
-              <TableCell>{reg.workCategory}</TableCell>
-              <TableCell>{reg.workDuration}h</TableCell>
-              <TableCell>{reg.breakDuration}h</TableCell>
-              <TableCell>{reg.publicHoliday ? "Yes" : "No"}</TableCell>
-            </TableRow>
-          ))}
-        </TableBody>
+        <TimeRegistrationTableBody registrations={filteredAndSortedRegistrations} />
       </Table>
     </div>
   );
