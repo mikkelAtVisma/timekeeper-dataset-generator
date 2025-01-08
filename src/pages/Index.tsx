@@ -7,6 +7,7 @@ import { generateSampleData } from "../utils/generateData";
 import { Label } from "@/components/ui/label";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Slider } from "@/components/ui/slider";
+import { DatasetGenerationForm } from "../components/DatasetGenerationForm";
 
 const Index = () => {
   const [registrations, setRegistrations] = useState<TimeRegistration[]>([]);
@@ -26,6 +27,10 @@ const Index = () => {
     setRegistrations((prev) => [...sampleData, ...prev]);
   };
 
+  const handleGenerateDataset = (newRegistrations: TimeRegistration[]) => {
+    setRegistrations((prev) => [...newRegistrations, ...prev]);
+  };
+
   return (
     <div className="min-h-screen bg-gray-50 py-8">
       <div className="container mx-auto px-4 space-y-8">
@@ -34,7 +39,12 @@ const Index = () => {
         </div>
         
         <div className="bg-white p-6 rounded-lg shadow-sm space-y-6">
-          <h2 className="text-xl font-semibold">Data Generation Controls</h2>
+          <h2 className="text-xl font-semibold">Dataset Generation</h2>
+          <DatasetGenerationForm onGenerate={handleGenerateDataset} />
+        </div>
+
+        <div className="bg-white p-6 rounded-lg shadow-sm space-y-6">
+          <h2 className="text-xl font-semibold">Sample Data Generation</h2>
           
           <div className="space-y-4">
             <div>
@@ -73,7 +83,7 @@ const Index = () => {
             )}
 
             <Button onClick={handleGenerateData} className="mt-4">
-              Generate Data
+              Generate Sample Data
             </Button>
           </div>
         </div>
