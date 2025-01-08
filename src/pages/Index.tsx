@@ -1,15 +1,17 @@
 import { useState } from "react";
 import { TimeRegistration } from "../types/timeRegistration";
 import { TimeRegistrationTable } from "../components/TimeRegistrationTable";
+import { TimeRegistrationCalendar } from "../components/TimeRegistrationCalendar";
 import { Label } from "@/components/ui/label";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Slider } from "@/components/ui/slider";
 import { DatasetGenerationForm } from "../components/DatasetGenerationForm";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
 const Index = () => {
   const [registrations, setRegistrations] = useState<TimeRegistration[]>([]);
   const [anomalyType, setAnomalyType] = useState<"none" | "weak" | "strong">("none");
-  const [anomalyProbability, setAnomalyProbability] = useState([0.33]); // Default to 33%
+  const [anomalyProbability, setAnomalyProbability] = useState([0.33]);
 
   const handleGenerateDataset = (newRegistrations: TimeRegistration[]) => {
     setRegistrations((prev) => [...newRegistrations, ...prev]);
@@ -70,7 +72,18 @@ const Index = () => {
         
         <div className="mt-8">
           <h2 className="text-xl font-semibold mb-4">Registrations</h2>
-          <TimeRegistrationTable registrations={registrations} />
+          <Tabs defaultValue="list" className="w-full">
+            <TabsList>
+              <TabsTrigger value="list">List View</TabsTrigger>
+              <TabsTrigger value="calendar">Calendar View</TabsTrigger>
+            </TabsList>
+            <TabsContent value="list">
+              <TimeRegistrationTable registrations={registrations} />
+            </TabsContent>
+            <TabsContent value="calendar">
+              <TimeRegistrationCalendar registrations={registrations} />
+            </TabsContent>
+          </Tabs>
         </div>
       </div>
     </div>
