@@ -38,6 +38,7 @@ const generateEmployeeWorkPattern = (
   employeeId: string,
   workStartRange: number[],
   workEndRange: number[],
+  breakDurationRange: number[],
   departments: string[],
   workCategories: string[],
   workPatternConfig: WorkPatternConfig,
@@ -46,6 +47,7 @@ const generateEmployeeWorkPattern = (
 ): EmployeeWorkPattern => {
   const allStartTimes = generateTimeIncrements(workStartRange[0], workStartRange[1]);
   const allEndTimes = generateTimeIncrements(workEndRange[0], workEndRange[1]);
+  const allBreakDurations = generateTimeIncrements(breakDurationRange[0], breakDurationRange[1], 0.5);
 
   // Get unique random start and end times
   const allowedStartTimes = getUniqueRandomElements(
@@ -56,6 +58,11 @@ const generateEmployeeWorkPattern = (
   const allowedEndTimes = getUniqueRandomElements(
     allEndTimes,
     workPatternConfig.numEndTimes
+  );
+
+  const allowedBreakDurations = getUniqueRandomElements(
+    allBreakDurations,
+    workPatternConfig.numBreakDurations
   );
 
   const departmentId = departments[Math.floor(Math.random() * Math.min(departments.length, workPatternConfig.numDepartments))];
@@ -75,6 +82,7 @@ const generateEmployeeWorkPattern = (
     employeeId,
     allowedStartTimes,
     allowedEndTimes,
+    allowedBreakDurations,
     departmentId,
     allowedWorkCategories,
     canWorkWeekends,
@@ -125,6 +133,7 @@ export const generateDataset = (params: GenerateDatasetParams): { registrations:
         employeeId,
         workStartRange,
         workEndRange,
+        breakDurationRange,
         departments,
         workCategories,
         workPatternConfig,
@@ -159,8 +168,10 @@ export const generateDataset = (params: GenerateDatasetParams): { registrations:
 
       const actualEndTime = endTime <= startTime ? startTime + 8 : endTime;
 
-      const breakTimes = generateTimeIncrements(breakDurationRange[0], breakDurationRange[1], 0.5);
-      const breakDuration = breakTimes[Math.floor(Math.random() * breakTimes.length)];
+      const breakDuration = workPattern.allowedBreakDurations[
+        Math.floor(Math.random() * workPattern.allowedBreakDurations.length)
+      ];
+      
       const workDuration = actualEndTime - startTime - breakDuration;
 
       registrations.push({

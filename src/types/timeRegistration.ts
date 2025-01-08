@@ -7,6 +7,7 @@ export interface EmployeeWorkPattern {
   employeeId: string;
   allowedStartTimes: number[];
   allowedEndTimes: number[];
+  allowedBreakDurations: number[];
   departmentId: string;
   allowedWorkCategories: string[];
   canWorkWeekends: boolean;
