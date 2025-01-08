@@ -6,6 +6,7 @@ import { startOfWeek, addMonths, format } from "date-fns";
 import { BasicSettingsSection } from "./dataset-generation/BasicSettingsSection";
 import { TimeSettingsSection } from "./dataset-generation/TimeSettingsSection";
 import { AnomalySettingsSection } from "./dataset-generation/AnomalySettingsSection";
+import { WorkPatternSettingsSection } from "./dataset-generation/WorkPatternSettingsSection";
 import { generateDataset } from "../utils/datasetGenerator";
 import { EmployeePatternVisualization } from "./EmployeePatternVisualization";
 
@@ -37,10 +38,16 @@ export const DatasetGenerationForm = ({ onGenerate }: DatasetGenerationFormProps
   const [employeePatterns, setEmployeePatterns] = useState<EmployeeWorkPattern[]>([]);
   const [existingPatterns, setExistingPatterns] = useState<Map<string, EmployeeWorkPattern>>(new Map());
   
+  // Work Pattern settings
+  const [numDepartments, setNumDepartments] = useState([1]);
+  const [numStartTimes, setNumStartTimes] = useState([2]);
+  const [numEndTimes, setNumEndTimes] = useState([2]);
+  const [numBreakDurations, setNumBreakDurations] = useState([1]);
+  
   // Time settings
-  const [workStartRange, setWorkStartRange] = useState([7, 9]); // 7-9 AM
-  const [workEndRange, setWorkEndRange] = useState([16, 18]); // 4-6 PM
-  const [breakDurationRange, setBreakDurationRange] = useState([0.5, 2]); // 0.5-2 hours
+  const [workStartRange, setWorkStartRange] = useState([7, 9]);
+  const [workEndRange, setWorkEndRange] = useState([16, 18]);
+  const [breakDurationRange, setBreakDurationRange] = useState([0.5, 2]);
   const [skipWeekends, setSkipWeekends] = useState(true);
   const [randomizeAssignments, setRandomizeAssignments] = useState(true);
 
@@ -89,7 +96,13 @@ export const DatasetGenerationForm = ({ onGenerate }: DatasetGenerationFormProps
         type: anomalyType,
         probability: anomalyProbability[0]
       },
-      existingPatterns: existingPatterns
+      existingPatterns: existingPatterns,
+      workPatternConfig: {
+        numDepartments: numDepartments[0],
+        numStartTimes: numStartTimes[0],
+        numEndTimes: numEndTimes[0],
+        numBreakDurations: numBreakDurations[0]
+      }
     });
 
     // Update both the displayed patterns and the stored patterns
@@ -109,7 +122,7 @@ export const DatasetGenerationForm = ({ onGenerate }: DatasetGenerationFormProps
   };
 
   return (
-    <form onSubmit={handleSubmit} className="space-y-6 max-w-xl mx-auto bg-white p-6 rounded-lg shadow-md">
+    <form onSubmit={handleSubmit} className="space-y-6 max-w-3xl mx-auto bg-white p-6 rounded-lg shadow-md">
       <div className="space-y-6">
         <div>
           <h3 className="text-lg font-medium mb-4">Basic Settings</h3>
@@ -122,6 +135,20 @@ export const DatasetGenerationForm = ({ onGenerate }: DatasetGenerationFormProps
             setEndDate={setEndDate}
             numRegistrations={numRegistrations}
             setNumRegistrations={setNumRegistrations}
+          />
+        </div>
+
+        <div>
+          <h3 className="text-lg font-medium mb-4">Work Pattern Settings</h3>
+          <WorkPatternSettingsSection
+            numDepartments={numDepartments}
+            setNumDepartments={setNumDepartments}
+            numStartTimes={numStartTimes}
+            setNumStartTimes={setNumStartTimes}
+            numEndTimes={numEndTimes}
+            setNumEndTimes={setNumEndTimes}
+            numBreakDurations={numBreakDurations}
+            setNumBreakDurations={setNumBreakDurations}
           />
         </div>
 
