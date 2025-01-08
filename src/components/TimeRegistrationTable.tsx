@@ -9,13 +9,8 @@ import {
 import { CircleAlert } from "lucide-react";
 import { TimeRegistration } from "../types/timeRegistration";
 import { useState, useMemo } from "react";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
+import { TableFilters } from "./table/TableFilters";
+import { SortableTableHeader } from "./table/SortableTableHeader";
 
 interface TimeRegistrationTableProps {
   registrations: TimeRegistration[];
@@ -33,6 +28,14 @@ export const TimeRegistrationTable = ({ registrations }: TimeRegistrationTablePr
     publicHoliday: "all",
   });
 
+  const [sort, setSort] = useState<{
+    field: string;
+    direction: 'asc' | 'desc' | null;
+  }>({
+    field: '',
+    direction: null,
+  });
+
   const uniqueValues = useMemo(() => {
     return {
       dates: [...new Set(registrations.map(reg => reg.date))],
@@ -45,6 +48,20 @@ export const TimeRegistrationTable = ({ registrations }: TimeRegistrationTablePr
     };
   }, [registrations]);
 
+  const handleSort = (field: string) => {
+    setSort(prev => ({
+      field,
+      direction: 
+        prev.field === field
+          ? prev.direction === 'asc'
+            ? 'desc'
+            : prev.direction === 'desc'
+              ? null
+              : 'asc'
+          : 'asc'
+    }));
+  };
+
   const isAnomalous = (reg: TimeRegistration) => {
     return reg.anomaly && reg.anomaly > 0;
   };
@@ -56,43 +73,41 @@ export const TimeRegistrationTable = ({ registrations }: TimeRegistrationTablePr
     }));
   };
 
-  const filteredRegistrations = registrations.filter((reg) => {
-    return (
-      (filters.date === "all" || reg.date === filters.date) &&
-      (filters.employeeId === "all" || reg.employeeId === filters.employeeId) &&
-      (filters.projectId === "all" || reg.projectId === filters.projectId) &&
-      (filters.departmentId === "all" || reg.departmentId === filters.departmentId) &&
-      (filters.workCategory === "all" || reg.workCategory === filters.workCategory) &&
-      (filters.workDuration === "all" || reg.workDuration.toString() === filters.workDuration) &&
-      (filters.breakDuration === "all" || reg.breakDuration.toString() === filters.breakDuration) &&
-      (filters.publicHoliday === "all" || 
-        (filters.publicHoliday === "yes" && reg.publicHoliday) ||
-        (filters.publicHoliday === "no" && !reg.publicHoliday))
-    );
-  });
+  const filteredAndSortedRegistrations = useMemo(() => {
+    let result = registrations.filter((reg) => {
+      return (
+        (filters.date === "all" || reg.date === filters.date) &&
+        (filters.employeeId === "all" || reg.employeeId === filters.employeeId) &&
+        (filters.projectId === "all" || reg.projectId === filters.projectId) &&
+        (filters.departmentId === "all" || reg.departmentId === filters.departmentId) &&
+        (filters.workCategory === "all" || reg.workCategory === filters.workCategory) &&
+        (filters.workDuration === "all" || reg.workDuration.toString() === filters.workDuration) &&
+        (filters.breakDuration === "all" || reg.breakDuration.toString() === filters.breakDuration) &&
+        (filters.publicHoliday === "all" || 
+          (filters.publicHoliday === "yes" && reg.publicHoliday) ||
+          (filters.publicHoliday === "no" && !reg.publicHoliday))
+      );
+    });
 
-  const renderSelect = (
-    field: string,
-    options: string[],
-    placeholder: string
-  ) => (
-    <Select
-      value={filters[field as keyof typeof filters]}
-      onValueChange={(value) => handleFilterChange(field, value)}
-    >
-      <SelectTrigger className="h-8 w-full">
-        <SelectValue placeholder={placeholder} />
-      </SelectTrigger>
-      <SelectContent>
-        <SelectItem value="all">All</SelectItem>
-        {options.map((option) => (
-          <SelectItem key={option} value={option}>
-            {option}
-          </SelectItem>
-        ))}
-      </SelectContent>
-    </Select>
-  );
+    if (sort.field && sort.direction) {
+      result = [...result].sort((a, b) => {
+        const aValue = a[sort.field as keyof TimeRegistration];
+        const bValue = b[sort.field as keyof TimeRegistration];
+        
+        if (typeof aValue === 'number' && typeof bValue === 'number') {
+          return sort.direction === 'asc' ? aValue - bValue : bValue - aValue;
+        }
+        
+        const aStr = String(aValue);
+        const bStr = String(bValue);
+        return sort.direction === 'asc' 
+          ? aStr.localeCompare(bStr)
+          : bStr.localeCompare(aStr);
+      });
+    }
+
+    return result;
+  }, [registrations, filters, sort]);
 
   return (
     <div className="rounded-md border">
@@ -100,71 +115,91 @@ export const TimeRegistrationTable = ({ registrations }: TimeRegistrationTablePr
         <TableHeader>
           <TableRow>
             <TableHead>Status</TableHead>
-            <TableHead>
-              <div className="space-y-2">
-                <div>Date</div>
-                {renderSelect('date', uniqueValues.dates, 'Filter date...')}
-              </div>
-            </TableHead>
-            <TableHead>
-              <div className="space-y-2">
-                <div>Employee</div>
-                {renderSelect('employeeId', uniqueValues.employeeIds, 'Filter employee...')}
-              </div>
-            </TableHead>
-            <TableHead>
-              <div className="space-y-2">
-                <div>Project</div>
-                {renderSelect('projectId', uniqueValues.projectIds, 'Filter project...')}
-              </div>
-            </TableHead>
-            <TableHead>
-              <div className="space-y-2">
-                <div>Department</div>
-                {renderSelect('departmentId', uniqueValues.departmentIds, 'Filter department...')}
-              </div>
-            </TableHead>
-            <TableHead>
-              <div className="space-y-2">
-                <div>Category</div>
-                {renderSelect('workCategory', uniqueValues.workCategories, 'Filter category...')}
-              </div>
-            </TableHead>
-            <TableHead>
-              <div className="space-y-2">
-                <div>Duration</div>
-                {renderSelect('workDuration', uniqueValues.workDurations, 'Filter duration...')}
-              </div>
-            </TableHead>
-            <TableHead>
-              <div className="space-y-2">
-                <div>Break</div>
-                {renderSelect('breakDuration', uniqueValues.breakDurations, 'Filter break...')}
-              </div>
-            </TableHead>
-            <TableHead>
-              <div className="space-y-2">
-                <div>Holiday</div>
-                <Select
-                  value={filters.publicHoliday}
-                  onValueChange={(value) => handleFilterChange('publicHoliday', value)}
-                >
-                  <SelectTrigger className="h-8 w-full">
-                    <SelectValue placeholder="Filter holiday..." />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="all">All</SelectItem>
-                    <SelectItem value="yes">Yes</SelectItem>
-                    <SelectItem value="no">No</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
-            </TableHead>
+            <SortableTableHeader field="date" currentSort={sort} onSort={handleSort}>
+              <div>Date</div>
+              <TableFilters
+                field="date"
+                options={uniqueValues.dates}
+                placeholder="Filter date..."
+                value={filters.date}
+                onValueChange={(value) => handleFilterChange('date', value)}
+              />
+            </SortableTableHeader>
+            <SortableTableHeader field="employeeId" currentSort={sort} onSort={handleSort}>
+              <div>Employee</div>
+              <TableFilters
+                field="employeeId"
+                options={uniqueValues.employeeIds}
+                placeholder="Filter employee..."
+                value={filters.employeeId}
+                onValueChange={(value) => handleFilterChange('employeeId', value)}
+              />
+            </SortableTableHeader>
+            <SortableTableHeader field="projectId" currentSort={sort} onSort={handleSort}>
+              <div>Project</div>
+              <TableFilters
+                field="projectId"
+                options={uniqueValues.projectIds}
+                placeholder="Filter project..."
+                value={filters.projectId}
+                onValueChange={(value) => handleFilterChange('projectId', value)}
+              />
+            </SortableTableHeader>
+            <SortableTableHeader field="departmentId" currentSort={sort} onSort={handleSort}>
+              <div>Department</div>
+              <TableFilters
+                field="departmentId"
+                options={uniqueValues.departmentIds}
+                placeholder="Filter department..."
+                value={filters.departmentId}
+                onValueChange={(value) => handleFilterChange('departmentId', value)}
+              />
+            </SortableTableHeader>
+            <SortableTableHeader field="workCategory" currentSort={sort} onSort={handleSort}>
+              <div>Category</div>
+              <TableFilters
+                field="workCategory"
+                options={uniqueValues.workCategories}
+                placeholder="Filter category..."
+                value={filters.workCategory}
+                onValueChange={(value) => handleFilterChange('workCategory', value)}
+              />
+            </SortableTableHeader>
+            <SortableTableHeader field="workDuration" currentSort={sort} onSort={handleSort}>
+              <div>Duration</div>
+              <TableFilters
+                field="workDuration"
+                options={uniqueValues.workDurations}
+                placeholder="Filter duration..."
+                value={filters.workDuration}
+                onValueChange={(value) => handleFilterChange('workDuration', value)}
+              />
+            </SortableTableHeader>
+            <SortableTableHeader field="breakDuration" currentSort={sort} onSort={handleSort}>
+              <div>Break</div>
+              <TableFilters
+                field="breakDuration"
+                options={uniqueValues.breakDurations}
+                placeholder="Filter break..."
+                value={filters.breakDuration}
+                onValueChange={(value) => handleFilterChange('breakDuration', value)}
+              />
+            </SortableTableHeader>
+            <SortableTableHeader field="publicHoliday" currentSort={sort} onSort={handleSort}>
+              <div>Holiday</div>
+              <TableFilters
+                field="publicHoliday"
+                options={["yes", "no"]}
+                placeholder="Filter holiday..."
+                value={filters.publicHoliday}
+                onValueChange={(value) => handleFilterChange('publicHoliday', value)}
+              />
+            </SortableTableHeader>
             <TableHead>Numericals</TableHead>
           </TableRow>
         </TableHeader>
         <TableBody>
-          {filteredRegistrations.map((reg) => (
+          {filteredAndSortedRegistrations.map((reg) => (
             <TableRow 
               key={reg.registrationId}
               className={isAnomalous(reg) ? "bg-red-50" : ""}
