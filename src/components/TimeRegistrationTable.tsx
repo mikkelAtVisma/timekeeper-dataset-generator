@@ -18,16 +18,6 @@ export const TimeRegistrationTable = ({ registrations }: TimeRegistrationTablePr
     return reg.anomaly && reg.anomaly > 0;
   };
 
-  const getAnomalousField = (reg: TimeRegistration) => {
-    // This is a simplified example - in a real application, you would want to
-    // determine which specific field is anomalous based on your anomaly detection logic
-    if (reg.workDuration > 12) return "Work Duration";
-    if (reg.breakDuration > 3) return "Break Duration";
-    if (reg.startTime < 6 || reg.startTime > 18) return "Start Time";
-    if (reg.endTime < reg.startTime || reg.endTime > 22) return "End Time";
-    return "Unknown";
-  };
-
   return (
     <div className="rounded-md border">
       <Table>
@@ -55,7 +45,7 @@ export const TimeRegistrationTable = ({ registrations }: TimeRegistrationTablePr
                 {isAnomalous(reg) && (
                   <div className="flex items-center gap-2">
                     <CircleAlert className="h-4 w-4 text-[#ea384c]" />
-                    <span className="text-xs text-red-600">{getAnomalousField(reg)}</span>
+                    <span className="text-xs text-red-600">{reg.anomalyField}</span>
                   </div>
                 )}
               </TableCell>

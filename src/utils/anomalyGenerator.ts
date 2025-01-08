@@ -44,25 +44,37 @@ const introduceWeakAnomaly = (registration: TimeRegistration): TimeRegistration 
   switch (aspect) {
     case "startTime":
       reg.startTime = adjustTimeValue(reg.startTime, 6, 12, "weak");
+      reg.anomaly = 1;
+      reg.anomalyField = "Start Time";
       break;
     case "endTime":
       reg.endTime = adjustTimeValue(reg.endTime, 14, 20, "weak");
+      reg.anomaly = 1;
+      reg.anomalyField = "End Time";
       break;
     case "breakDuration":
       reg.breakDuration = Number((reg.breakDuration + (Math.random() < 0.5 ? 0.5 : -0.5)).toFixed(1));
+      reg.anomaly = 1;
+      reg.anomalyField = "Break Duration";
       break;
     case "workDuration":
       reg.workDuration = Number((reg.workDuration + (Math.random() < 0.5 ? 1 : -1)).toFixed(1));
+      reg.anomaly = 1;
+      reg.anomalyField = "Work Duration";
       break;
     case "numerical":
       if (reg.numericals.length > 0) {
         const numericalIndex = Math.floor(Math.random() * reg.numericals.length);
         const numerical = reg.numericals[numericalIndex];
         numerical.value += Math.random() < 0.5 ? 1 : -1;
+        reg.anomaly = 1;
+        reg.anomalyField = `Numerical (${numerical.name})`;
       }
       break;
     case "project":
-      reg.projectId = "Z"; // Anomalous project ID
+      reg.projectId = "Z";
+      reg.anomaly = 1;
+      reg.anomalyField = "Project";
       break;
   }
 
@@ -80,9 +92,10 @@ const introduceStrongAnomaly = (registration: TimeRegistration): TimeRegistratio
       reg.startTime += timeShift;
       reg.endTime += timeShift;
       reg.workDuration = Math.max(0, reg.endTime - reg.startTime - reg.breakDuration);
+      reg.anomaly = 2;
+      reg.anomalyField = "Time Shift";
       break;
     case "date":
-      // Convert weekday to weekend or vice versa
       const date = new Date(reg.date);
       const isWeekend = date.getDay() === 0 || date.getDay() === 6;
       if (isWeekend) {
@@ -91,12 +104,16 @@ const introduceStrongAnomaly = (registration: TimeRegistration): TimeRegistratio
         date.setDate(date.getDate() + (6 - date.getDay())); // Move to Saturday
       }
       reg.date = date.toISOString().split('T')[0];
+      reg.anomaly = 2;
+      reg.anomalyField = "Date (Weekend)";
       break;
     case "numerical":
       if (reg.numericals.length > 0) {
         const numericalIndex = Math.floor(Math.random() * reg.numericals.length);
         const numerical = reg.numericals[numericalIndex];
         numerical.value += Math.random() < 0.5 ? 3 : -3;
+        reg.anomaly = 2;
+        reg.anomalyField = `Numerical (${numerical.name})`;
       }
       break;
   }
