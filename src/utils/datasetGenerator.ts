@@ -1,4 +1,4 @@
-import { TimeRegistration, EmployeeWorkPattern, GenerateDatasetParams } from "../types/timeRegistration";
+import { TimeRegistration, EmployeeWorkPattern, GenerateDatasetParams, WorkPatternConfig } from "../types/timeRegistration";
 import { injectAnomalies } from "./anomalyGenerator";
 
 const generateTimeIncrements = (start: number, end: number, step: number = 0.5): number[] => {
