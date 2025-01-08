@@ -92,7 +92,7 @@ export const TimeRegistrationTable = ({ registrations }: TimeRegistrationTablePr
       <Table>
         <TableHeader>
           <TableRow>
-            <TableHead>Status</TableHead>
+            <TableHead className="w-[100px]">Status</TableHead>
             <SortableTableHeader field="date" currentSort={sort} onSort={handleSort}>
               <div>Date</div>
               <TableFilters
@@ -143,13 +143,13 @@ export const TimeRegistrationTable = ({ registrations }: TimeRegistrationTablePr
                 onValueChange={(value) => handleFilterChange('workCategory', value)}
               />
             </SortableTableHeader>
-            <SortableTableHeader field="startTime" currentSort={sort} onSort={handleSort}>
+            <SortableTableHeader field="startTime" currentSort={sort} onSort={handleSort} className="w-[100px]">
               <div>Start Time</div>
             </SortableTableHeader>
-            <SortableTableHeader field="endTime" currentSort={sort} onSort={handleSort}>
+            <SortableTableHeader field="endTime" currentSort={sort} onSort={handleSort} className="w-[100px]">
               <div>End Time</div>
             </SortableTableHeader>
-            <SortableTableHeader field="workDuration" currentSort={sort} onSort={handleSort}>
+            <SortableTableHeader field="workDuration" currentSort={sort} onSort={handleSort} className="w-[100px]">
               <div>Duration</div>
               <TableFilters
                 field="workDuration"
@@ -159,7 +159,7 @@ export const TimeRegistrationTable = ({ registrations }: TimeRegistrationTablePr
                 onValueChange={(value) => handleFilterChange('workDuration', value)}
               />
             </SortableTableHeader>
-            <SortableTableHeader field="breakDuration" currentSort={sort} onSort={handleSort}>
+            <SortableTableHeader field="breakDuration" currentSort={sort} onSort={handleSort} className="w-[100px]">
               <div>Break</div>
               <TableFilters
                 field="breakDuration"
@@ -169,7 +169,7 @@ export const TimeRegistrationTable = ({ registrations }: TimeRegistrationTablePr
                 onValueChange={(value) => handleFilterChange('breakDuration', value)}
               />
             </SortableTableHeader>
-            <SortableTableHeader field="publicHoliday" currentSort={sort} onSort={handleSort}>
+            <SortableTableHeader field="publicHoliday" currentSort={sort} onSort={handleSort} className="w-[100px]">
               <div>Holiday</div>
               <TableFilters
                 field="publicHoliday"
