@@ -1,3 +1,4 @@
+import React, { useState } from "react";
 import { Calendar } from "@/components/ui/calendar";
 import { Card, CardContent } from "@/components/ui/card";
 import { ScrollArea } from "@/components/ui/scroll-area";
@@ -10,7 +11,7 @@ interface TimeRegistrationCalendarProps {
 
 export const TimeRegistrationCalendar = ({ registrations }: TimeRegistrationCalendarProps) => {
   const today = new Date();
-  const [selectedDate, setSelectedDate] = React.useState<Date | undefined>(today);
+  const [selectedDate, setSelectedDate] = useState<Date | undefined>(today);
 
   const registrationsForDate = selectedDate 
     ? registrations.filter(reg => reg.date === format(selectedDate, 'yyyy-MM-dd'))
