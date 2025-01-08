@@ -6,16 +6,30 @@ import { useToast } from "@/components/ui/use-toast";
 import { Slider } from "@/components/ui/slider";
 import { TimeRegistration } from "../types/timeRegistration";
 import { Switch } from "@/components/ui/switch";
+import { startOfWeek, addMonths, format } from "date-fns";
 
 interface DatasetGenerationFormProps {
   onGenerate: (registrations: TimeRegistration[]) => void;
 }
 
+// Get the Monday of the current week and format it as YYYY-MM-DD
+const getInitialStartDate = () => {
+  const monday = startOfWeek(new Date(), { weekStartsOn: 1 });
+  return format(monday, 'yyyy-MM-dd');
+};
+
+// Get the date one month after the start date
+const getInitialEndDate = () => {
+  const monday = startOfWeek(new Date(), { weekStartsOn: 1 });
+  const monthLater = addMonths(monday, 1);
+  return format(monthLater, 'yyyy-MM-dd');
+};
+
 export const DatasetGenerationForm = ({ onGenerate }: DatasetGenerationFormProps) => {
   const { toast } = useToast();
   const [numEmployees, setNumEmployees] = useState(5);
-  const [startDate, setStartDate] = useState("");
-  const [endDate, setEndDate] = useState("");
+  const [startDate, setStartDate] = useState(getInitialStartDate());
+  const [endDate, setEndDate] = useState(getInitialEndDate());
   const [projects] = useState(["A", "B", "C", "D"]);
   const [workCategories] = useState(["Development", "Testing", "Meetings", "Documentation"]);
   const [departments] = useState(["HR", "IT", "Sales", "Marketing"]);
