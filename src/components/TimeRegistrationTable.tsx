@@ -23,14 +23,14 @@ interface TimeRegistrationTableProps {
 
 export const TimeRegistrationTable = ({ registrations }: TimeRegistrationTableProps) => {
   const [filters, setFilters] = useState({
-    date: "",
-    employeeId: "",
-    projectId: "",
-    departmentId: "",
-    workCategory: "",
-    workDuration: "",
-    breakDuration: "",
-    publicHoliday: "",
+    date: "all",
+    employeeId: "all",
+    projectId: "all",
+    departmentId: "all",
+    workCategory: "all",
+    workDuration: "all",
+    breakDuration: "all",
+    publicHoliday: "all",
   });
 
   const uniqueValues = useMemo(() => {
@@ -58,16 +58,16 @@ export const TimeRegistrationTable = ({ registrations }: TimeRegistrationTablePr
 
   const filteredRegistrations = registrations.filter((reg) => {
     return (
-      (!filters.date || reg.date === filters.date) &&
-      (!filters.employeeId || reg.employeeId === filters.employeeId) &&
-      (!filters.projectId || reg.projectId === filters.projectId) &&
-      (!filters.departmentId || reg.departmentId === filters.departmentId) &&
-      (!filters.workCategory || reg.workCategory === filters.workCategory) &&
-      (!filters.workDuration || reg.workDuration.toString() === filters.workDuration) &&
-      (!filters.breakDuration || reg.breakDuration.toString() === filters.breakDuration) &&
-      (!filters.publicHoliday || 
-        (filters.publicHoliday === 'yes' && reg.publicHoliday) ||
-        (filters.publicHoliday === 'no' && !reg.publicHoliday))
+      (filters.date === "all" || reg.date === filters.date) &&
+      (filters.employeeId === "all" || reg.employeeId === filters.employeeId) &&
+      (filters.projectId === "all" || reg.projectId === filters.projectId) &&
+      (filters.departmentId === "all" || reg.departmentId === filters.departmentId) &&
+      (filters.workCategory === "all" || reg.workCategory === filters.workCategory) &&
+      (filters.workDuration === "all" || reg.workDuration.toString() === filters.workDuration) &&
+      (filters.breakDuration === "all" || reg.breakDuration.toString() === filters.breakDuration) &&
+      (filters.publicHoliday === "all" || 
+        (filters.publicHoliday === "yes" && reg.publicHoliday) ||
+        (filters.publicHoliday === "no" && !reg.publicHoliday))
     );
   });
 
@@ -84,7 +84,7 @@ export const TimeRegistrationTable = ({ registrations }: TimeRegistrationTablePr
         <SelectValue placeholder={placeholder} />
       </SelectTrigger>
       <SelectContent>
-        <SelectItem value="">All</SelectItem>
+        <SelectItem value="all">All</SelectItem>
         {options.map((option) => (
           <SelectItem key={option} value={option}>
             {option}
@@ -150,10 +150,10 @@ export const TimeRegistrationTable = ({ registrations }: TimeRegistrationTablePr
                   onValueChange={(value) => handleFilterChange('publicHoliday', value)}
                 >
                   <SelectTrigger className="h-8 w-full">
-                    <SelectValue placeholder="yes/no" />
+                    <SelectValue placeholder="Filter holiday..." />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="">All</SelectItem>
+                    <SelectItem value="all">All</SelectItem>
                     <SelectItem value="yes">Yes</SelectItem>
                     <SelectItem value="no">No</SelectItem>
                   </SelectContent>
