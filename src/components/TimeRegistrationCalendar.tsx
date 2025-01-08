@@ -26,9 +26,10 @@ interface TimeRegistrationCalendarProps {
 type ViewMode = "week" | "month";
 
 export const TimeRegistrationCalendar = ({ registrations }: TimeRegistrationCalendarProps) => {
+  const today = new Date(); // Define today variable
+
   // Get the Monday of the current week
   const getInitialDate = () => {
-    const today = new Date();
     return startOfWeek(today, { weekStartsOn: 1 });
   };
 
