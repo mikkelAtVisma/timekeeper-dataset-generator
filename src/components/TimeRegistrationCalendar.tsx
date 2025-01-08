@@ -6,21 +6,17 @@ import {
   format, 
   startOfWeek, 
   endOfWeek, 
-  eachDayOfInterval, 
+  eachDayOfInterval,
   isSameMonth,
   addWeeks,
   addMonths,
 } from "date-fns";
-import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
-import { Label } from "@/components/ui/label";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 import { Button } from "./ui/button";
 
 interface TimeRegistrationCalendarProps {
   registrations: TimeRegistration[];
 }
-
-type ViewMode = "week" | "month";
 
 export const TimeRegistrationCalendar = ({ registrations }: TimeRegistrationCalendarProps) => {
   const today = new Date();
@@ -30,7 +26,6 @@ export const TimeRegistrationCalendar = ({ registrations }: TimeRegistrationCale
   };
 
   const [selectedDate, setSelectedDate] = useState<Date>(getInitialDate());
-  const [viewMode, setViewMode] = useState<ViewMode>("week");
 
   const employees = useMemo(() => {
     const employeeIds = new Set(registrations.map(reg => reg.employeeId));
@@ -38,26 +33,19 @@ export const TimeRegistrationCalendar = ({ registrations }: TimeRegistrationCale
   }, [registrations]);
 
   const dateRanges = useMemo(() => {
-    if (viewMode === "week") {
-      return [eachDayOfInterval({
-        start: startOfWeek(selectedDate, { weekStartsOn: 1 }),
-        end: endOfWeek(selectedDate, { weekStartsOn: 1 })
-      })];
-    } else {
-      const monthStart = selectedDate;
-      const monthEnd = addMonths(monthStart, 1);
-      const firstWeekStart = monthStart;
-      const weeksToShow = 4;
-      
-      return Array.from({ length: weeksToShow }, (_, weekIndex) => {
-        const weekStart = addWeeks(firstWeekStart, weekIndex);
-        return eachDayOfInterval({
-          start: weekStart,
-          end: endOfWeek(weekStart, { weekStartsOn: 1 })
-        });
+    const monthStart = selectedDate;
+    const monthEnd = addMonths(monthStart, 1);
+    const firstWeekStart = monthStart;
+    const weeksToShow = 4;
+    
+    return Array.from({ length: weeksToShow }, (_, weekIndex) => {
+      const weekStart = addWeeks(firstWeekStart, weekIndex);
+      return eachDayOfInterval({
+        start: weekStart,
+        end: endOfWeek(weekStart, { weekStartsOn: 1 })
       });
-    }
-  }, [selectedDate, viewMode]);
+    });
+  }, [selectedDate]);
 
   const getRegistrationsForDate = (employeeId: string, date: Date) => {
     return registrations.filter(reg => 
@@ -68,11 +56,7 @@ export const TimeRegistrationCalendar = ({ registrations }: TimeRegistrationCale
 
   const navigateDate = (direction: 'prev' | 'next') => {
     const newDate = new Date(selectedDate);
-    if (viewMode === 'week') {
-      newDate.setDate(newDate.getDate() + (direction === 'next' ? 7 : -7));
-    } else {
-      newDate.setDate(newDate.getDate() + (direction === 'next' ? 28 : -28));
-    }
+    newDate.setDate(newDate.getDate() + (direction === 'next' ? 28 : -28));
     setSelectedDate(newDate);
   };
 
@@ -88,7 +72,7 @@ export const TimeRegistrationCalendar = ({ registrations }: TimeRegistrationCale
             <ChevronLeft className="h-4 w-4" />
           </Button>
           <h3 className="text-lg font-semibold">
-            {format(selectedDate, viewMode === 'week' ? 'MMMM d, yyyy' : 'MMMM yyyy')}
+            {format(selectedDate, 'MMMM yyyy')}
           </h3>
           <Button
             variant="outline"
@@ -98,20 +82,6 @@ export const TimeRegistrationCalendar = ({ registrations }: TimeRegistrationCale
             <ChevronRight className="h-4 w-4" />
           </Button>
         </div>
-        <RadioGroup
-          value={viewMode}
-          onValueChange={(value: ViewMode) => setViewMode(value)}
-          className="flex space-x-4"
-        >
-          <div className="flex items-center space-x-2">
-            <RadioGroupItem value="week" id="week" />
-            <Label htmlFor="week">Week View</Label>
-          </div>
-          <div className="flex items-center space-x-2">
-            <RadioGroupItem value="month" id="month" />
-            <Label htmlFor="month">Month View</Label>
-          </div>
-        </RadioGroup>
       </div>
 
       <Card>
@@ -122,13 +92,13 @@ export const TimeRegistrationCalendar = ({ registrations }: TimeRegistrationCale
                 <div key={weekIndex} className="mb-4">
                   <div className="grid grid-cols-[200px_repeat(7,1fr)] gap-2 mb-2">
                     <div className="font-semibold">
-                      {viewMode === 'month' && `Week ${weekIndex + 1}`}
+                      Week {weekIndex + 1}
                     </div>
                     {weekDates.map((date) => (
                       <div 
                         key={date.toISOString()} 
                         className={`font-semibold text-center p-2 text-xs ${
-                          !isSameMonth(date, selectedDate) && viewMode === 'month'
+                          !isSameMonth(date, selectedDate)
                             ? 'text-muted-foreground'
                             : ''
                         } ${
@@ -157,7 +127,7 @@ export const TimeRegistrationCalendar = ({ registrations }: TimeRegistrationCale
                           <div 
                             key={date.toISOString()}
                             className={`p-2 text-center border rounded min-h-[80px] ${
-                              !isSameMonth(date, selectedDate) && viewMode === 'month'
+                              !isSameMonth(date, selectedDate)
                                 ? 'bg-muted/50'
                                 : dayRegistrations.length > 0
                                   ? 'bg-accent/20' 
