@@ -103,14 +103,18 @@ const introduceStrongAnomaly = (registration: TimeRegistration): TimeRegistratio
     case "date":
       const date = new Date(reg.date);
       const isWeekend = date.getDay() === 0 || date.getDay() === 6;
-      if (isWeekend) {
-        date.setDate(date.getDate() - 2); // Move to Friday
-      } else {
-        date.setDate(date.getDate() + (6 - date.getDay())); // Move to Saturday
+      
+      // Only consider weekend work as an anomaly if the employee doesn't have a weekend work pattern
+      if (isWeekend && !registration.employeePattern?.canWorkWeekends) {
+        if (isWeekend) {
+          date.setDate(date.getDate() - 2); // Move to Friday
+        } else {
+          date.setDate(date.getDate() + (6 - date.getDay())); // Move to Saturday
+        }
+        reg.date = date.toISOString().split('T')[0];
+        reg.anomaly = 2;
+        reg.anomalyField = "Date (Weekend)";
       }
-      reg.date = date.toISOString().split('T')[0];
-      reg.anomaly = 2;
-      reg.anomalyField = "Date (Weekend)";
       break;
     case "numerical":
       if (reg.numericals.length > 0) {
