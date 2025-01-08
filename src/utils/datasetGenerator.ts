@@ -18,6 +18,7 @@ interface GenerateDatasetParams {
     type: "none" | "weak" | "strong";
     probability: number;
   };
+  existingPatterns?: Map<string, EmployeeWorkPattern>;
 }
 
 interface GenerateDatasetResult {
@@ -106,6 +107,7 @@ export const generateDataset = (params: GenerateDatasetParams): GenerateDatasetR
     skipWeekends,
     randomizeAssignments,
     anomalyConfig,
+    existingPatterns = new Map(),
   } = params;
 
   const registrations: TimeRegistration[] = [];
@@ -120,7 +122,7 @@ export const generateDataset = (params: GenerateDatasetParams): GenerateDatasetR
   }
 
   // Create a map to store work patterns by employee ID
-  const employeeWorkPatternsMap = new Map<string, EmployeeWorkPattern>();
+  const employeeWorkPatternsMap = new Map<string, EmployeeWorkPattern>(existingPatterns);
 
   // Generate or retrieve work patterns for each employee
   for (let empIdx = 0; empIdx < numEmployees; empIdx++) {

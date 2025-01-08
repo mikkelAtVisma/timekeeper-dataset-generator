@@ -35,6 +35,7 @@ export const DatasetGenerationForm = ({ onGenerate }: DatasetGenerationFormProps
   const [departments] = useState(["HR", "IT", "Sales", "Marketing"]);
   const [numRegistrations, setNumRegistrations] = useState([35]);
   const [employeePatterns, setEmployeePatterns] = useState<EmployeeWorkPattern[]>([]);
+  const [existingPatterns, setExistingPatterns] = useState<Map<string, EmployeeWorkPattern>>(new Map());
   
   // Time settings
   const [workStartRange, setWorkStartRange] = useState([7, 9]); // 7-9 AM
@@ -70,7 +71,7 @@ export const DatasetGenerationForm = ({ onGenerate }: DatasetGenerationFormProps
       return;
     }
 
-    // Generate data using the parameters
+    // Generate data using the parameters and pass existing patterns
     const { registrations, patterns } = generateDataset({
       numEmployees,
       startDate,
@@ -87,10 +88,18 @@ export const DatasetGenerationForm = ({ onGenerate }: DatasetGenerationFormProps
       anomalyConfig: {
         type: anomalyType,
         probability: anomalyProbability[0]
-      }
+      },
+      existingPatterns: existingPatterns
     });
 
+    // Update both the displayed patterns and the stored patterns
     setEmployeePatterns(patterns);
+    const newPatternsMap = new Map(existingPatterns);
+    patterns.forEach(pattern => {
+      newPatternsMap.set(pattern.employeeId, pattern);
+    });
+    setExistingPatterns(newPatternsMap);
+    
     onGenerate(registrations);
     
     toast({
