@@ -47,11 +47,17 @@ export const generateSampleData = (
           value: Math.floor(Math.random() * 100),
         },
       ],
+      anomaly: 0, // Default to no anomaly
     };
   });
 
   if (includeAnomalies && anomalyConfig) {
-    return injectAnomalies(registrations, anomalyConfig);
+    const anomalyValue = anomalyConfig.type === "weak" ? 1 : 2;
+    registrations.forEach(reg => {
+      if (Math.random() < anomalyConfig.probability) {
+        reg.anomaly = anomalyValue;
+      }
+    });
   }
 
   return registrations;
