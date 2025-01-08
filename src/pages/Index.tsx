@@ -3,6 +3,7 @@ import { TimeRegistration } from "../types/timeRegistration";
 import { TimeRegistrationTable } from "../components/TimeRegistrationTable";
 import { TimeRegistrationCalendar } from "../components/TimeRegistrationCalendar";
 import { DatasetGenerationForm } from "../components/DatasetGenerationForm";
+import { WorkPatternVisualization } from "../components/WorkPatternVisualization";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
 const Index = () => {
@@ -30,6 +31,12 @@ const Index = () => {
           <h2 className="text-xl font-semibold">Dataset Generation</h2>
           <DatasetGenerationForm onGenerate={handleGenerateDataset} />
         </div>
+
+        {registrations.length > 0 && (
+          <div className="bg-white p-6 rounded-lg shadow-sm">
+            <WorkPatternVisualization registrations={registrations} />
+          </div>
+        )}
         
         <div className="mt-8">
           <h2 className="text-xl font-semibold mb-4">Registrations</h2>
