@@ -33,7 +33,6 @@ export const DatasetGenerationForm = ({ onGenerate }: DatasetGenerationFormProps
   const [projects] = useState(["A", "B", "C", "D"]);
   const [workCategories] = useState(["Development", "Testing", "Meetings", "Documentation"]);
   const [departments] = useState(["HR", "IT", "Sales", "Marketing"]);
-  const [numericals] = useState(["productivity", "quality", "satisfaction"]);
   const [numRegistrations, setNumRegistrations] = useState([35]);
   
   // New state variables for additional controls
@@ -42,7 +41,6 @@ export const DatasetGenerationForm = ({ onGenerate }: DatasetGenerationFormProps
   const [breakDurationRange, setBreakDurationRange] = useState([0.5, 2]); // 0.5-2 hours
   const [skipWeekends, setSkipWeekends] = useState(true);
   const [randomizeAssignments, setRandomizeAssignments] = useState(true);
-  const [useEmployeeNumericals, setUseEmployeeNumericals] = useState(true);
 
   const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -75,14 +73,12 @@ export const DatasetGenerationForm = ({ onGenerate }: DatasetGenerationFormProps
       projects,
       workCategories,
       departments,
-      numericals,
       numRegistrationsPerEmployee: numRegistrations[0],
       workStartRange,
       workEndRange,
       breakDurationRange,
       skipWeekends,
       randomizeAssignments,
-      useEmployeeNumericals,
     });
 
     onGenerate(registrations);
@@ -92,6 +88,8 @@ export const DatasetGenerationForm = ({ onGenerate }: DatasetGenerationFormProps
       description: "Dataset generated successfully",
     });
   };
+
+  // ... keep existing code (form JSX)
 
   return (
     <form onSubmit={handleSubmit} className="space-y-4 max-w-xl mx-auto bg-white p-6 rounded-lg shadow-md">
@@ -194,15 +192,6 @@ export const DatasetGenerationForm = ({ onGenerate }: DatasetGenerationFormProps
         <Label htmlFor="randomizeAssignments">Randomize Project & Work Category Assignments</Label>
       </div>
 
-      <div className="flex items-center space-x-2">
-        <Switch
-          id="useEmployeeNumericals"
-          checked={useEmployeeNumericals}
-          onCheckedChange={setUseEmployeeNumericals}
-        />
-        <Label htmlFor="useEmployeeNumericals">Use Employee-specific Numericals</Label>
-      </div>
-
       <Button type="submit" className="w-full">Generate Dataset</Button>
     </form>
   );
@@ -215,14 +204,12 @@ interface GenerateDatasetParams {
   projects: string[];
   workCategories: string[];
   departments: string[];
-  numericals: string[];
   numRegistrationsPerEmployee: number;
   workStartRange: number[];
   workEndRange: number[];
   breakDurationRange: number[];
   skipWeekends: boolean;
   randomizeAssignments: boolean;
-  useEmployeeNumericals: boolean;
 }
 
 const generateDataset = ({
@@ -232,14 +219,12 @@ const generateDataset = ({
   projects,
   workCategories,
   departments,
-  numericals,
   numRegistrationsPerEmployee,
   workStartRange,
   workEndRange,
   breakDurationRange,
   skipWeekends,
   randomizeAssignments,
-  useEmployeeNumericals,
 }: GenerateDatasetParams): TimeRegistration[] => {
   const registrations: TimeRegistration[] = [];
   const start = new Date(startDate);
@@ -253,27 +238,11 @@ const generateDataset = ({
     }
   }
 
-  // Pre-generate employee numericals if using employee-specific values
-  const employeeNumericalsList = Array.from({ length: numEmployees }, () => {
-    if (!useEmployeeNumericals) return [];
-    
-    const numNumericals = Math.floor(Math.random() * 3) + 1;
-    return numericals
-      .slice(0, numNumericals)
-      .map(name => ({
-        name,
-        value: Math.floor(Math.random() * 100),
-      }));
-  });
-
   // Generate registrations for each employee
   for (let empIdx = 0; empIdx < numEmployees; empIdx++) {
     const employeeId = `employee-${empIdx}`;
     const departmentId = departments[empIdx % departments.length];
     
-    // Use pre-generated numericals or generate new ones
-    const employeeNumericals = employeeNumericalsList[empIdx];
-
     // Generate registrations
     for (let i = 0; i < numRegistrationsPerEmployee; i++) {
       const date = dateRange[Math.floor(Math.random() * dateRange.length)];
@@ -300,13 +269,7 @@ const generateDataset = ({
         workDuration,
         breakDuration,
         publicHoliday: Math.random() > 0.9,
-        numericals: useEmployeeNumericals ? 
-          employeeNumericals : 
-          numericals.slice(0, Math.floor(Math.random() * 3) + 1)
-            .map(name => ({
-              name,
-              value: Math.floor(Math.random() * 100),
-            })),
+        numericals: [],
         anomaly: 0,
       });
     }

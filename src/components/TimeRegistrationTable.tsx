@@ -195,7 +195,6 @@ export const TimeRegistrationTable = ({ registrations }: TimeRegistrationTablePr
                 onValueChange={(value) => handleFilterChange('publicHoliday', value)}
               />
             </SortableTableHeader>
-            <TableHead>Numericals</TableHead>
           </TableRow>
         </TableHeader>
         <TableBody>
@@ -222,13 +221,6 @@ export const TimeRegistrationTable = ({ registrations }: TimeRegistrationTablePr
               <TableCell>{reg.workDuration}h</TableCell>
               <TableCell>{reg.breakDuration}h</TableCell>
               <TableCell>{reg.publicHoliday ? "Yes" : "No"}</TableCell>
-              <TableCell>
-                {reg.numericals.map((n, i) => (
-                  <div key={i}>
-                    {n.name}: {n.value}
-                  </div>
-                ))}
-              </TableCell>
             </TableRow>
           ))}
         </TableBody>
