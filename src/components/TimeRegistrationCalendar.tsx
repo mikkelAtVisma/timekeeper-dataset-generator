@@ -2,7 +2,17 @@ import React, { useState, useMemo } from "react";
 import { Card, CardContent } from "@/components/ui/card";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { TimeRegistration } from "../types/timeRegistration";
-import { format, startOfWeek, endOfWeek, eachDayOfInterval, startOfMonth, endOfMonth, isSameDay } from "date-fns";
+import { 
+  format, 
+  startOfWeek, 
+  endOfWeek, 
+  eachDayOfInterval, 
+  startOfMonth, 
+  endOfMonth, 
+  addWeeks,
+  isSameMonth,
+  getWeeksInMonth
+} from "date-fns";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Label } from "@/components/ui/label";
 import { ChevronLeft, ChevronRight } from "lucide-react";
@@ -26,16 +36,24 @@ export const TimeRegistrationCalendar = ({ registrations }: TimeRegistrationCale
   }, [registrations]);
 
   // Get date range based on view mode
-  const dateRange = useMemo(() => {
+  const dateRanges = useMemo(() => {
     if (viewMode === "week") {
-      return eachDayOfInterval({
+      return [eachDayOfInterval({
         start: startOfWeek(selectedDate, { weekStartsOn: 1 }),
         end: endOfWeek(selectedDate, { weekStartsOn: 1 })
-      });
+      })];
     } else {
-      return eachDayOfInterval({
-        start: startOfMonth(selectedDate),
-        end: endOfMonth(selectedDate)
+      const monthStart = startOfMonth(selectedDate);
+      const monthEnd = endOfMonth(selectedDate);
+      const firstWeekStart = startOfWeek(monthStart, { weekStartsOn: 1 });
+      const weeksInMonth = getWeeksInMonth(selectedDate, { weekStartsOn: 1 });
+      
+      return Array.from({ length: weeksInMonth }, (_, weekIndex) => {
+        const weekStart = addWeeks(firstWeekStart, weekIndex);
+        return eachDayOfInterval({
+          start: weekStart,
+          end: endOfWeek(weekStart, { weekStartsOn: 1 })
+        });
       });
     }
   }, [selectedDate, viewMode]);
@@ -100,46 +118,67 @@ export const TimeRegistrationCalendar = ({ registrations }: TimeRegistrationCale
         <CardContent className="p-4">
           <ScrollArea className="h-[600px]">
             <div className="min-w-[800px]">
-              {/* Header row with dates */}
-              <div className="grid grid-cols-[200px_repeat(auto-fill,minmax(80px,1fr))] gap-2 mb-4">
-                <div className="font-semibold">Employee</div>
-                {dateRange.map((date) => (
-                  <div 
-                    key={date.toISOString()} 
-                    className="font-semibold text-center p-2 bg-muted text-xs"
-                  >
-                    {format(date, viewMode === 'week' ? 'MMM d' : 'd')}
-                  </div>
-                ))}
-              </div>
-
-              {/* Grid rows for each employee */}
-              {employees.map((employeeId) => (
-                <div 
-                  key={employeeId}
-                  className="grid grid-cols-[200px_repeat(auto-fill,minmax(80px,1fr))] gap-2 mb-2"
-                >
-                  <div className="font-medium p-2">{employeeId}</div>
-                  {dateRange.map((date) => {
-                    const registration = getRegistrationForDate(employeeId, date);
-                    return (
+              {dateRanges.map((weekDates, weekIndex) => (
+                <div key={weekIndex} className="mb-4">
+                  {/* Header row with dates for each week */}
+                  <div className="grid grid-cols-[200px_repeat(7,1fr)] gap-2 mb-2">
+                    <div className="font-semibold">
+                      {viewMode === 'month' && `Week ${weekIndex + 1}`}
+                    </div>
+                    {weekDates.map((date) => (
                       <div 
-                        key={date.toISOString()}
-                        className={`p-2 text-center border rounded ${
-                          registration ? 'bg-accent' : 'bg-background'
+                        key={date.toISOString()} 
+                        className={`font-semibold text-center p-2 text-xs ${
+                          !isSameMonth(date, selectedDate) && viewMode === 'month'
+                            ? 'text-muted-foreground'
+                            : ''
+                        } ${
+                          format(date, 'yyyy-MM-dd') === format(today, 'yyyy-MM-dd')
+                            ? 'bg-accent text-accent-foreground'
+                            : 'bg-muted'
                         }`}
                       >
-                        {registration && (
-                          <div className="text-xs">
-                            <div>{registration.workDuration.toFixed(2)}h</div>
-                            <div className="text-muted-foreground">
-                              {registration.workCategory}
-                            </div>
-                          </div>
-                        )}
+                        <div>{format(date, 'd')}</div>
+                        <div className="text-[10px] text-muted-foreground">
+                          {format(date, 'EEE')}
+                        </div>
                       </div>
-                    );
-                  })}
+                    ))}
+                  </div>
+
+                  {/* Grid rows for each employee */}
+                  {employees.map((employeeId) => (
+                    <div 
+                      key={`${weekIndex}-${employeeId}`}
+                      className="grid grid-cols-[200px_repeat(7,1fr)] gap-2 mb-2"
+                    >
+                      <div className="font-medium p-2">{employeeId}</div>
+                      {weekDates.map((date) => {
+                        const registration = getRegistrationForDate(employeeId, date);
+                        return (
+                          <div 
+                            key={date.toISOString()}
+                            className={`p-2 text-center border rounded ${
+                              !isSameMonth(date, selectedDate) && viewMode === 'month'
+                                ? 'bg-muted/50'
+                                : registration 
+                                  ? 'bg-accent' 
+                                  : 'bg-background'
+                            }`}
+                          >
+                            {registration && (
+                              <div className="text-xs">
+                                <div>{registration.workDuration.toFixed(2)}h</div>
+                                <div className="text-muted-foreground">
+                                  {registration.workCategory}
+                                </div>
+                              </div>
+                            )}
+                          </div>
+                        );
+                      })}
+                    </div>
+                  ))}
                 </div>
               ))}
             </div>
