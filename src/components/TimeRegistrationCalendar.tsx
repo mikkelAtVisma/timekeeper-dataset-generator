@@ -1,11 +1,12 @@
 import React, { useState, useMemo } from "react";
-import { Calendar } from "@/components/ui/calendar";
 import { Card, CardContent } from "@/components/ui/card";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { TimeRegistration } from "../types/timeRegistration";
 import { format, startOfWeek, endOfWeek, eachDayOfInterval, startOfMonth, endOfMonth, isSameDay } from "date-fns";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Label } from "@/components/ui/label";
+import { ChevronLeft, ChevronRight } from "lucide-react";
+import { Button } from "./ui/button";
 
 interface TimeRegistrationCalendarProps {
   registrations: TimeRegistration[];
@@ -47,16 +48,37 @@ export const TimeRegistrationCalendar = ({ registrations }: TimeRegistrationCale
     );
   };
 
+  const navigateDate = (direction: 'prev' | 'next') => {
+    const newDate = new Date(selectedDate);
+    if (viewMode === 'week') {
+      newDate.setDate(newDate.getDate() + (direction === 'next' ? 7 : -7));
+    } else {
+      newDate.setMonth(newDate.getMonth() + (direction === 'next' ? 1 : -1));
+    }
+    setSelectedDate(newDate);
+  };
+
   return (
     <div className="space-y-4">
       <div className="flex items-center justify-between">
-        <div>
-          <Calendar
-            mode="single"
-            selected={selectedDate}
-            onSelect={(date) => date && setSelectedDate(date)}
-            className="rounded-md border"
-          />
+        <div className="flex items-center gap-4">
+          <Button
+            variant="outline"
+            size="icon"
+            onClick={() => navigateDate('prev')}
+          >
+            <ChevronLeft className="h-4 w-4" />
+          </Button>
+          <h3 className="text-lg font-semibold">
+            {format(selectedDate, viewMode === 'week' ? 'MMMM d, yyyy' : 'MMMM yyyy')}
+          </h3>
+          <Button
+            variant="outline"
+            size="icon"
+            onClick={() => navigateDate('next')}
+          >
+            <ChevronRight className="h-4 w-4" />
+          </Button>
         </div>
         <RadioGroup
           value={viewMode}
@@ -79,14 +101,14 @@ export const TimeRegistrationCalendar = ({ registrations }: TimeRegistrationCale
           <ScrollArea className="h-[600px]">
             <div className="min-w-[800px]">
               {/* Header row with dates */}
-              <div className="grid grid-cols-[200px_repeat(auto-fill,minmax(120px,1fr))] gap-2 mb-4">
+              <div className="grid grid-cols-[200px_repeat(auto-fill,minmax(80px,1fr))] gap-2 mb-4">
                 <div className="font-semibold">Employee</div>
                 {dateRange.map((date) => (
                   <div 
                     key={date.toISOString()} 
-                    className="font-semibold text-center p-2 bg-muted"
+                    className="font-semibold text-center p-2 bg-muted text-xs"
                   >
-                    {format(date, 'MMM d')}
+                    {format(date, viewMode === 'week' ? 'MMM d' : 'd')}
                   </div>
                 ))}
               </div>
@@ -95,7 +117,7 @@ export const TimeRegistrationCalendar = ({ registrations }: TimeRegistrationCale
               {employees.map((employeeId) => (
                 <div 
                   key={employeeId}
-                  className="grid grid-cols-[200px_repeat(auto-fill,minmax(120px,1fr))] gap-2 mb-2"
+                  className="grid grid-cols-[200px_repeat(auto-fill,minmax(80px,1fr))] gap-2 mb-2"
                 >
                   <div className="font-medium p-2">{employeeId}</div>
                   {dateRange.map((date) => {
