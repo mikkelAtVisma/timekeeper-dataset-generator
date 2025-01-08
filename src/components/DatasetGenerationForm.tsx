@@ -12,6 +12,7 @@ import { EmployeePatternVisualization } from "./EmployeePatternVisualization";
 
 interface DatasetGenerationFormProps {
   onGenerate: (registrations: TimeRegistration[]) => void;
+  onClear?: () => void;
 }
 
 // Get the Monday of the current week and format it as YYYY-MM-DD
@@ -26,7 +27,7 @@ const getInitialEndDate = () => {
   return format(monthLater, 'yyyy-MM-dd');
 };
 
-export const DatasetGenerationForm = ({ onGenerate }: DatasetGenerationFormProps) => {
+export const DatasetGenerationForm = ({ onGenerate, onClear }: DatasetGenerationFormProps) => {
   const { toast } = useToast();
   const [numEmployees, setNumEmployees] = useState(5);
   const [startDate, setStartDate] = useState(getInitialStartDate());
@@ -56,6 +57,14 @@ export const DatasetGenerationForm = ({ onGenerate }: DatasetGenerationFormProps
   // Anomaly settings
   const [anomalyType, setAnomalyType] = useState<"none" | "weak" | "strong">("none");
   const [anomalyProbability, setAnomalyProbability] = useState([0.33]);
+
+  // Clear patterns when onClear is called
+  React.useEffect(() => {
+    if (onClear) {
+      setEmployeePatterns([]);
+      setExistingPatterns(new Map());
+    }
+  }, [onClear]);
 
   const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();

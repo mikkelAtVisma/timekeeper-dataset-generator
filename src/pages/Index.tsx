@@ -13,6 +13,7 @@ const Index = () => {
   const [registrations, setRegistrations] = useState<TimeRegistration[]>([]);
   const [selectedRegistrationId, setSelectedRegistrationId] = useState<string | null>(null);
   const [activeTab, setActiveTab] = useState("list");
+  const [clearTrigger, setClearTrigger] = useState(0);
 
   const handleGenerateDataset = (newRegistrations: TimeRegistration[]) => {
     setRegistrations((prev) => [...newRegistrations, ...prev]);
@@ -26,6 +27,7 @@ const Index = () => {
   const handleClearDataset = () => {
     setRegistrations([]);
     setSelectedRegistrationId(null);
+    setClearTrigger(prev => prev + 1);
     toast({
       title: "Dataset cleared",
       description: "All registrations and patterns have been removed",
@@ -51,7 +53,10 @@ const Index = () => {
         
         <div className="bg-white p-6 rounded-lg shadow-sm space-y-6">
           <h2 className="text-xl font-semibold">Dataset Generation</h2>
-          <DatasetGenerationForm onGenerate={handleGenerateDataset} />
+          <DatasetGenerationForm 
+            onGenerate={handleGenerateDataset} 
+            onClear={clearTrigger > 0 ? () => {} : undefined}
+          />
         </div>
         
         <div className="mt-8">
