@@ -5,6 +5,7 @@ import { Label } from "@/components/ui/label";
 import { useToast } from "@/components/ui/use-toast";
 import { Slider } from "@/components/ui/slider";
 import { TimeRegistration } from "../types/timeRegistration";
+import { Switch } from "@/components/ui/switch";
 
 interface DatasetGenerationFormProps {
   onGenerate: (registrations: TimeRegistration[]) => void;
@@ -20,6 +21,14 @@ export const DatasetGenerationForm = ({ onGenerate }: DatasetGenerationFormProps
   const [departments] = useState(["HR", "IT", "Sales", "Marketing"]);
   const [numericals] = useState(["productivity", "quality", "satisfaction"]);
   const [numRegistrations, setNumRegistrations] = useState([35]);
+  
+  // New state variables for additional controls
+  const [workStartRange, setWorkStartRange] = useState([7, 9]); // 7-9 AM
+  const [workEndRange, setWorkEndRange] = useState([16, 18]); // 4-6 PM
+  const [breakDurationRange, setBreakDurationRange] = useState([0.5, 2]); // 0.5-2 hours
+  const [skipWeekends, setSkipWeekends] = useState(true);
+  const [randomizeAssignments, setRandomizeAssignments] = useState(true);
+  const [useEmployeeNumericals, setUseEmployeeNumericals] = useState(true);
 
   const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -54,6 +63,12 @@ export const DatasetGenerationForm = ({ onGenerate }: DatasetGenerationFormProps
       departments,
       numericals,
       numRegistrationsPerEmployee: numRegistrations[0],
+      workStartRange,
+      workEndRange,
+      breakDurationRange,
+      skipWeekends,
+      randomizeAssignments,
+      useEmployeeNumericals,
     });
 
     onGenerate(registrations);
@@ -111,6 +126,69 @@ export const DatasetGenerationForm = ({ onGenerate }: DatasetGenerationFormProps
         />
       </div>
 
+      <div className="space-y-2">
+        <Label>Work Start Time Range ({workStartRange[0]}-{workStartRange[1]} AM)</Label>
+        <Slider
+          value={workStartRange}
+          onValueChange={setWorkStartRange}
+          min={7}
+          max={9}
+          step={0.5}
+          className="w-full"
+        />
+      </div>
+
+      <div className="space-y-2">
+        <Label>Work End Time Range ({workEndRange[0]-12}-{workEndRange[1]-12} PM)</Label>
+        <Slider
+          value={workEndRange}
+          onValueChange={setWorkEndRange}
+          min={16}
+          max={18}
+          step={0.5}
+          className="w-full"
+        />
+      </div>
+
+      <div className="space-y-2">
+        <Label>Break Duration Range ({breakDurationRange[0]}-{breakDurationRange[1]} hours)</Label>
+        <Slider
+          value={breakDurationRange}
+          onValueChange={setBreakDurationRange}
+          min={0.5}
+          max={2}
+          step={0.5}
+          className="w-full"
+        />
+      </div>
+
+      <div className="flex items-center space-x-2">
+        <Switch
+          id="skipWeekends"
+          checked={skipWeekends}
+          onCheckedChange={setSkipWeekends}
+        />
+        <Label htmlFor="skipWeekends">Skip Weekends</Label>
+      </div>
+
+      <div className="flex items-center space-x-2">
+        <Switch
+          id="randomizeAssignments"
+          checked={randomizeAssignments}
+          onCheckedChange={setRandomizeAssignments}
+        />
+        <Label htmlFor="randomizeAssignments">Randomize Project & Work Category Assignments</Label>
+      </div>
+
+      <div className="flex items-center space-x-2">
+        <Switch
+          id="useEmployeeNumericals"
+          checked={useEmployeeNumericals}
+          onCheckedChange={setUseEmployeeNumericals}
+        />
+        <Label htmlFor="useEmployeeNumericals">Use Employee-specific Numericals</Label>
+      </div>
+
       <Button type="submit" className="w-full">Generate Dataset</Button>
     </form>
   );
@@ -125,6 +203,12 @@ interface GenerateDatasetParams {
   departments: string[];
   numericals: string[];
   numRegistrationsPerEmployee: number;
+  workStartRange: number[];
+  workEndRange: number[];
+  breakDurationRange: number[];
+  skipWeekends: boolean;
+  randomizeAssignments: boolean;
+  useEmployeeNumericals: boolean;
 }
 
 const generateDataset = ({
@@ -136,6 +220,12 @@ const generateDataset = ({
   departments,
   numericals,
   numRegistrationsPerEmployee,
+  workStartRange,
+  workEndRange,
+  breakDurationRange,
+  skipWeekends,
+  randomizeAssignments,
+  useEmployeeNumericals,
 }: GenerateDatasetParams): TimeRegistration[] => {
   const registrations: TimeRegistration[] = [];
   const start = new Date(startDate);
@@ -144,47 +234,65 @@ const generateDataset = ({
   
   // Generate date range
   for (let d = new Date(start); d <= end; d.setDate(d.getDate() + 1)) {
-    dateRange.push(new Date(d));
+    if (!skipWeekends || (d.getDay() !== 0 && d.getDay() !== 6)) {
+      dateRange.push(new Date(d));
+    }
   }
+
+  // Pre-generate employee numericals if using employee-specific values
+  const employeeNumericalsList = Array.from({ length: numEmployees }, () => {
+    if (!useEmployeeNumericals) return [];
+    
+    const numNumericals = Math.floor(Math.random() * 3) + 1;
+    return numericals
+      .slice(0, numNumericals)
+      .map(name => ({
+        name,
+        value: Math.floor(Math.random() * 100),
+      }));
+  });
 
   // Generate registrations for each employee
   for (let empIdx = 0; empIdx < numEmployees; empIdx++) {
     const employeeId = `employee-${empIdx}`;
     const departmentId = departments[empIdx % departments.length];
     
-    // Generate employee numericals
-    const employeeNumericals = numericals
-      .slice(0, Math.floor(Math.random() * 3) + 1)
-      .map(name => ({
-        name,
-        value: Math.floor(Math.random() * 100),
-      }));
+    // Use pre-generated numericals or generate new ones
+    const employeeNumericals = employeeNumericalsList[empIdx];
 
     // Generate registrations
     for (let i = 0; i < numRegistrationsPerEmployee; i++) {
       const date = dateRange[Math.floor(Math.random() * dateRange.length)];
       
-      // Skip weekends (0 = Sunday, 6 = Saturday)
-      if (date.getDay() === 0 || date.getDay() === 6) continue;
-
-      const startTime = 7 + Math.floor(Math.random() * 2); // 7-9 AM
-      const endTime = 16 + Math.floor(Math.random() * 2); // 4-6 PM
-      const breakDuration = 0.5 + Math.floor(Math.random() * 3) * 0.5; // 0.5-2 hours
+      const startTime = workStartRange[0] + Math.random() * (workStartRange[1] - workStartRange[0]);
+      const endTime = workEndRange[0] + Math.random() * (workEndRange[1] - workEndRange[0]);
+      const breakDuration = breakDurationRange[0] + 
+        Math.random() * (breakDurationRange[1] - breakDurationRange[0]);
       const workDuration = endTime - startTime - breakDuration;
 
       registrations.push({
         registrationId: `reg-${registrations.length}`,
         date: date.toISOString().split('T')[0],
         employeeId,
-        projectId: projects[Math.floor(Math.random() * projects.length)],
+        projectId: randomizeAssignments ? 
+          projects[Math.floor(Math.random() * projects.length)] : 
+          projects[empIdx % projects.length],
         departmentId,
-        workCategory: workCategories[Math.floor(Math.random() * workCategories.length)],
+        workCategory: randomizeAssignments ? 
+          workCategories[Math.floor(Math.random() * workCategories.length)] : 
+          workCategories[empIdx % workCategories.length],
         startTime,
         endTime,
         workDuration,
         breakDuration,
         publicHoliday: Math.random() > 0.9,
-        numericals: employeeNumericals,
+        numericals: useEmployeeNumericals ? 
+          employeeNumericals : 
+          numericals.slice(0, Math.floor(Math.random() * 3) + 1)
+            .map(name => ({
+              name,
+              value: Math.floor(Math.random() * 100),
+            })),
         anomaly: 0,
       });
     }
