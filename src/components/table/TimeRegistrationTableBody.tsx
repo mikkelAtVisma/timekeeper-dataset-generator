@@ -11,6 +11,12 @@ export const TimeRegistrationTableBody = ({ registrations }: TimeRegistrationTab
     return reg.anomaly && reg.anomaly > 0;
   };
 
+  const formatTime = (time: number) => {
+    const hours = Math.floor(time);
+    const minutes = Math.round((time - hours) * 60);
+    return `${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}`;
+  };
+
   return (
     <TableBody>
       {registrations.map((reg) => (
@@ -33,6 +39,8 @@ export const TimeRegistrationTableBody = ({ registrations }: TimeRegistrationTab
           <TableCell>{reg.projectId}</TableCell>
           <TableCell>{reg.departmentId}</TableCell>
           <TableCell>{reg.workCategory}</TableCell>
+          <TableCell>{formatTime(reg.startTime)}</TableCell>
+          <TableCell>{formatTime(reg.endTime)}</TableCell>
           <TableCell>{reg.workDuration}h</TableCell>
           <TableCell>{reg.breakDuration}h</TableCell>
           <TableCell>{reg.publicHoliday ? "Yes" : "No"}</TableCell>

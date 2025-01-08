@@ -143,6 +143,12 @@ export const TimeRegistrationTable = ({ registrations }: TimeRegistrationTablePr
                 onValueChange={(value) => handleFilterChange('workCategory', value)}
               />
             </SortableTableHeader>
+            <SortableTableHeader field="startTime" currentSort={sort} onSort={handleSort}>
+              <div>Start Time</div>
+            </SortableTableHeader>
+            <SortableTableHeader field="endTime" currentSort={sort} onSort={handleSort}>
+              <div>End Time</div>
+            </SortableTableHeader>
             <SortableTableHeader field="workDuration" currentSort={sort} onSort={handleSort}>
               <div>Duration</div>
               <TableFilters
