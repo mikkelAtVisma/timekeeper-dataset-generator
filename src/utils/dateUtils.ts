@@ -1,6 +1,7 @@
 import { startOfWeek, addMonths, startOfMonth } from "date-fns";
+import { TimeRegistration } from "../types/timeRegistration";
 
-export const getInitialDate = (registrations: { date: string }[], selectedRegistrationId: string | null) => {
+export const getInitialDate = (registrations: TimeRegistration[], selectedRegistrationId: string | null) => {
   if (selectedRegistrationId && registrations.length > 0) {
     const selectedRegistration = registrations.find(reg => reg.registrationId === selectedRegistrationId);
     if (selectedRegistration) {

@@ -38,7 +38,7 @@ export const TimeRegistrationCalendar = ({
   const dateRanges = useMemo(() => {
     const weeksToShow = 4;
     return Array.from({ length: weeksToShow }, (_, weekIndex) => {
-      const weekStart = addWeeks(selectedDate, weekIndex);
+      const weekStart = startOfWeek(addWeeks(selectedDate, weekIndex), { weekStartsOn: 1 });
       return eachDayOfInterval({
         start: weekStart,
         end: endOfWeek(weekStart, { weekStartsOn: 1 })
