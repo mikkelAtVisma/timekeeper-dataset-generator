@@ -12,6 +12,13 @@ export interface EmployeeWorkPattern {
   canWorkWeekends: boolean;
 }
 
+export interface WorkPatternConfig {
+  numDepartments: number;
+  numStartTimes: number;
+  numEndTimes: number;
+  numBreakDurations: number;
+}
+
 export interface TimeRegistration {
   registrationId: string;
   date: string;
@@ -27,4 +34,25 @@ export interface TimeRegistration {
   numericals: Numerical[];
   anomaly?: number;
   anomalyField?: string;
+}
+
+export interface GenerateDatasetParams {
+  numEmployees: number;
+  startDate: string;
+  endDate: string;
+  projects: string[];
+  workCategories: string[];
+  departments: string[];
+  numRegistrationsPerEmployee: number;
+  workStartRange: number[];
+  workEndRange: number[];
+  breakDurationRange: number[];
+  skipWeekends: boolean;
+  randomizeAssignments: boolean;
+  anomalyConfig: {
+    type: "none" | "weak" | "strong";
+    probability: number;
+  };
+  existingPatterns?: Map<string, EmployeeWorkPattern>;
+  workPatternConfig: WorkPatternConfig;
 }
