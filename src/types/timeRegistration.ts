@@ -16,4 +16,5 @@ export interface TimeRegistration {
   breakDuration: number;
   publicHoliday: boolean;
   numericals: Numerical[];
+  anomaly?: number; // 0 for normal, 1 for weak anomaly, 2 for strong anomaly
 }
