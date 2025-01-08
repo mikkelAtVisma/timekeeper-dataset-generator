@@ -2,6 +2,27 @@ import { TimeRegistration, Numerical } from "../types/timeRegistration";
 
 type AnomalyType = "weak" | "strong";
 
+export const injectAnomalies = (
+  registrations: TimeRegistration[],
+  config: { type: "none" | "weak" | "strong"; probability: number }
+): TimeRegistration[] => {
+  return registrations.map(registration => {
+    const shouldInjectAnomaly = Math.random() < config.probability;
+    
+    if (!shouldInjectAnomaly) {
+      return registration;
+    }
+    
+    if (config.type === "weak") {
+      return introduceWeakAnomaly(registration);
+    } else if (config.type === "strong") {
+      return introduceStrongAnomaly(registration);
+    }
+    
+    return registration;
+  });
+};
+
 const adjustTimeValue = (
   currentValue: number,
   minValue: number,
@@ -81,18 +102,4 @@ const introduceStrongAnomaly = (registration: TimeRegistration): TimeRegistratio
   }
 
   return reg;
-};
-
-export const injectAnomalies = (registrations: TimeRegistration[]): TimeRegistration[] => {
-  return registrations.map(registration => {
-    const anomalyProbability = Math.random();
-    
-    if (anomalyProbability < 0.33) {
-      return introduceWeakAnomaly(registration);
-    } else if (anomalyProbability < 0.66) {
-      return introduceStrongAnomaly(registration);
-    }
-    
-    return registration;
-  });
 };

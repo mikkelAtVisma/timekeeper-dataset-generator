@@ -7,7 +7,16 @@ const generateProjectId = () => ["A", "B", "C", "D"][Math.floor(Math.random() * 
 const generateDepartmentId = () => ["HR", "IT", "Sales", "Marketing"][Math.floor(Math.random() * 4)];
 const generateWorkCategory = () => `${Math.floor(Math.random() * 200)}`;
 
-export const generateSampleData = (count: number = 10, includeAnomalies: boolean = false): TimeRegistration[] => {
+interface AnomalyConfig {
+  type: "none" | "weak" | "strong";
+  probability: number;
+}
+
+export const generateSampleData = (
+  count: number = 10, 
+  includeAnomalies: boolean = false,
+  anomalyConfig?: AnomalyConfig
+): TimeRegistration[] => {
   const registrations = Array.from({ length: count }, () => {
     const startTime = Math.floor(Math.random() * 12) + 6; // 6 AM to 6 PM
     const endTime = startTime + Math.floor(Math.random() * 8) + 4; // 4-12 hours later
@@ -41,5 +50,9 @@ export const generateSampleData = (count: number = 10, includeAnomalies: boolean
     };
   });
 
-  return includeAnomalies ? injectAnomalies(registrations) : registrations;
+  if (includeAnomalies && anomalyConfig) {
+    return injectAnomalies(registrations, anomalyConfig);
+  }
+
+  return registrations;
 };
