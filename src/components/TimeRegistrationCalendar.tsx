@@ -11,7 +11,8 @@ import {
   endOfMonth, 
   addWeeks,
   isSameMonth,
-  getWeeksInMonth
+  getWeeksInMonth,
+  addMonths,
 } from "date-fns";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Label } from "@/components/ui/label";
@@ -25,8 +26,13 @@ interface TimeRegistrationCalendarProps {
 type ViewMode = "week" | "month";
 
 export const TimeRegistrationCalendar = ({ registrations }: TimeRegistrationCalendarProps) => {
-  const today = new Date();
-  const [selectedDate, setSelectedDate] = useState<Date>(today);
+  // Get the Monday of the current week
+  const getInitialDate = () => {
+    const today = new Date();
+    return startOfWeek(today, { weekStartsOn: 1 });
+  };
+
+  const [selectedDate, setSelectedDate] = useState<Date>(getInitialDate());
   const [viewMode, setViewMode] = useState<ViewMode>("week");
 
   // Get unique employee IDs
@@ -43,12 +49,13 @@ export const TimeRegistrationCalendar = ({ registrations }: TimeRegistrationCale
         end: endOfWeek(selectedDate, { weekStartsOn: 1 })
       })];
     } else {
-      const monthStart = startOfMonth(selectedDate);
-      const monthEnd = endOfMonth(selectedDate);
-      const firstWeekStart = startOfWeek(monthStart, { weekStartsOn: 1 });
-      const weeksInMonth = getWeeksInMonth(selectedDate, { weekStartsOn: 1 });
+      // For month view, start from the Monday and show 4 weeks
+      const monthStart = selectedDate;
+      const monthEnd = addMonths(monthStart, 1);
+      const firstWeekStart = monthStart;
+      const weeksToShow = 4;
       
-      return Array.from({ length: weeksInMonth }, (_, weekIndex) => {
+      return Array.from({ length: weeksToShow }, (_, weekIndex) => {
         const weekStart = addWeeks(firstWeekStart, weekIndex);
         return eachDayOfInterval({
           start: weekStart,
@@ -71,7 +78,8 @@ export const TimeRegistrationCalendar = ({ registrations }: TimeRegistrationCale
     if (viewMode === 'week') {
       newDate.setDate(newDate.getDate() + (direction === 'next' ? 7 : -7));
     } else {
-      newDate.setMonth(newDate.getMonth() + (direction === 'next' ? 1 : -1));
+      // For month view, navigate by 4 weeks
+      newDate.setDate(newDate.getDate() + (direction === 'next' ? 28 : -28));
     }
     setSelectedDate(newDate);
   };
