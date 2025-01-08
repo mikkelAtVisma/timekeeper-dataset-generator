@@ -45,7 +45,9 @@ export const TimeRegistrationTable = ({ registrations }: TimeRegistrationTablePr
                 {isAnomalous(reg) && (
                   <div className="flex items-center gap-2">
                     <CircleAlert className="h-4 w-4 text-[#ea384c]" />
-                    <span className="text-xs text-red-600">{reg.anomalyField}</span>
+                    <span className="text-xs text-red-600">
+                      Anomaly in: {reg.anomalyField}
+                    </span>
                   </div>
                 )}
               </TableCell>
