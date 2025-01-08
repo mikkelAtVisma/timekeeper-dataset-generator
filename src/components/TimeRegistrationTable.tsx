@@ -6,10 +6,16 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { Input } from "@/components/ui/input";
 import { CircleAlert } from "lucide-react";
 import { TimeRegistration } from "../types/timeRegistration";
-import { useState } from "react";
+import { useState, useMemo } from "react";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 
 interface TimeRegistrationTableProps {
   registrations: TimeRegistration[];
@@ -27,6 +33,18 @@ export const TimeRegistrationTable = ({ registrations }: TimeRegistrationTablePr
     publicHoliday: "",
   });
 
+  const uniqueValues = useMemo(() => {
+    return {
+      dates: [...new Set(registrations.map(reg => reg.date))],
+      employeeIds: [...new Set(registrations.map(reg => reg.employeeId))],
+      projectIds: [...new Set(registrations.map(reg => reg.projectId))],
+      departmentIds: [...new Set(registrations.map(reg => reg.departmentId))],
+      workCategories: [...new Set(registrations.map(reg => reg.workCategory))],
+      workDurations: [...new Set(registrations.map(reg => reg.workDuration.toString()))],
+      breakDurations: [...new Set(registrations.map(reg => reg.breakDuration.toString()))],
+    };
+  }, [registrations]);
+
   const isAnomalous = (reg: TimeRegistration) => {
     return reg.anomaly && reg.anomaly > 0;
   };
@@ -40,18 +58,41 @@ export const TimeRegistrationTable = ({ registrations }: TimeRegistrationTablePr
 
   const filteredRegistrations = registrations.filter((reg) => {
     return (
-      (!filters.date || reg.date.toLowerCase().includes(filters.date.toLowerCase())) &&
-      (!filters.employeeId || reg.employeeId.toLowerCase().includes(filters.employeeId.toLowerCase())) &&
-      (!filters.projectId || reg.projectId.toLowerCase().includes(filters.projectId.toLowerCase())) &&
-      (!filters.departmentId || reg.departmentId.toLowerCase().includes(filters.departmentId.toLowerCase())) &&
-      (!filters.workCategory || reg.workCategory.toLowerCase().includes(filters.workCategory.toLowerCase())) &&
-      (!filters.workDuration || reg.workDuration.toString().includes(filters.workDuration)) &&
-      (!filters.breakDuration || reg.breakDuration.toString().includes(filters.breakDuration)) &&
+      (!filters.date || reg.date === filters.date) &&
+      (!filters.employeeId || reg.employeeId === filters.employeeId) &&
+      (!filters.projectId || reg.projectId === filters.projectId) &&
+      (!filters.departmentId || reg.departmentId === filters.departmentId) &&
+      (!filters.workCategory || reg.workCategory === filters.workCategory) &&
+      (!filters.workDuration || reg.workDuration.toString() === filters.workDuration) &&
+      (!filters.breakDuration || reg.breakDuration.toString() === filters.breakDuration) &&
       (!filters.publicHoliday || 
-        (filters.publicHoliday.toLowerCase() === 'yes' && reg.publicHoliday) ||
-        (filters.publicHoliday.toLowerCase() === 'no' && !reg.publicHoliday))
+        (filters.publicHoliday === 'yes' && reg.publicHoliday) ||
+        (filters.publicHoliday === 'no' && !reg.publicHoliday))
     );
   });
+
+  const renderSelect = (
+    field: string,
+    options: string[],
+    placeholder: string
+  ) => (
+    <Select
+      value={filters[field as keyof typeof filters]}
+      onValueChange={(value) => handleFilterChange(field, value)}
+    >
+      <SelectTrigger className="h-8 w-full">
+        <SelectValue placeholder={placeholder} />
+      </SelectTrigger>
+      <SelectContent>
+        <SelectItem value="">All</SelectItem>
+        {options.map((option) => (
+          <SelectItem key={option} value={option}>
+            {option}
+          </SelectItem>
+        ))}
+      </SelectContent>
+    </Select>
+  );
 
   return (
     <div className="rounded-md border">
@@ -62,89 +103,61 @@ export const TimeRegistrationTable = ({ registrations }: TimeRegistrationTablePr
             <TableHead>
               <div className="space-y-2">
                 <div>Date</div>
-                <Input
-                  placeholder="Filter date..."
-                  value={filters.date}
-                  onChange={(e) => handleFilterChange('date', e.target.value)}
-                  className="h-8"
-                />
+                {renderSelect('date', uniqueValues.dates, 'Filter date...')}
               </div>
             </TableHead>
             <TableHead>
               <div className="space-y-2">
                 <div>Employee</div>
-                <Input
-                  placeholder="Filter employee..."
-                  value={filters.employeeId}
-                  onChange={(e) => handleFilterChange('employeeId', e.target.value)}
-                  className="h-8"
-                />
+                {renderSelect('employeeId', uniqueValues.employeeIds, 'Filter employee...')}
               </div>
             </TableHead>
             <TableHead>
               <div className="space-y-2">
                 <div>Project</div>
-                <Input
-                  placeholder="Filter project..."
-                  value={filters.projectId}
-                  onChange={(e) => handleFilterChange('projectId', e.target.value)}
-                  className="h-8"
-                />
+                {renderSelect('projectId', uniqueValues.projectIds, 'Filter project...')}
               </div>
             </TableHead>
             <TableHead>
               <div className="space-y-2">
                 <div>Department</div>
-                <Input
-                  placeholder="Filter department..."
-                  value={filters.departmentId}
-                  onChange={(e) => handleFilterChange('departmentId', e.target.value)}
-                  className="h-8"
-                />
+                {renderSelect('departmentId', uniqueValues.departmentIds, 'Filter department...')}
               </div>
             </TableHead>
             <TableHead>
               <div className="space-y-2">
                 <div>Category</div>
-                <Input
-                  placeholder="Filter category..."
-                  value={filters.workCategory}
-                  onChange={(e) => handleFilterChange('workCategory', e.target.value)}
-                  className="h-8"
-                />
+                {renderSelect('workCategory', uniqueValues.workCategories, 'Filter category...')}
               </div>
             </TableHead>
             <TableHead>
               <div className="space-y-2">
                 <div>Duration</div>
-                <Input
-                  placeholder="Filter duration..."
-                  value={filters.workDuration}
-                  onChange={(e) => handleFilterChange('workDuration', e.target.value)}
-                  className="h-8"
-                />
+                {renderSelect('workDuration', uniqueValues.workDurations, 'Filter duration...')}
               </div>
             </TableHead>
             <TableHead>
               <div className="space-y-2">
                 <div>Break</div>
-                <Input
-                  placeholder="Filter break..."
-                  value={filters.breakDuration}
-                  onChange={(e) => handleFilterChange('breakDuration', e.target.value)}
-                  className="h-8"
-                />
+                {renderSelect('breakDuration', uniqueValues.breakDurations, 'Filter break...')}
               </div>
             </TableHead>
             <TableHead>
               <div className="space-y-2">
                 <div>Holiday</div>
-                <Input
-                  placeholder="yes/no"
+                <Select
                   value={filters.publicHoliday}
-                  onChange={(e) => handleFilterChange('publicHoliday', e.target.value)}
-                  className="h-8"
-                />
+                  onValueChange={(value) => handleFilterChange('publicHoliday', value)}
+                >
+                  <SelectTrigger className="h-8 w-full">
+                    <SelectValue placeholder="yes/no" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="">All</SelectItem>
+                    <SelectItem value="yes">Yes</SelectItem>
+                    <SelectItem value="no">No</SelectItem>
+                  </SelectContent>
+                </Select>
               </div>
             </TableHead>
             <TableHead>Numericals</TableHead>
