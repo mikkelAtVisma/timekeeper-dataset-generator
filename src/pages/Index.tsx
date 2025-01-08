@@ -1,9 +1,6 @@
 import { useState } from "react";
 import { TimeRegistration } from "../types/timeRegistration";
-import { TimeRegistrationForm } from "../components/TimeRegistrationForm";
 import { TimeRegistrationTable } from "../components/TimeRegistrationTable";
-import { Button } from "@/components/ui/button";
-import { generateSampleData } from "../utils/generateData";
 import { Label } from "@/components/ui/label";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Slider } from "@/components/ui/slider";
@@ -13,19 +10,6 @@ const Index = () => {
   const [registrations, setRegistrations] = useState<TimeRegistration[]>([]);
   const [anomalyType, setAnomalyType] = useState<"none" | "weak" | "strong">("none");
   const [anomalyProbability, setAnomalyProbability] = useState([0.33]); // Default to 33%
-
-  const handleSubmit = (registration: TimeRegistration) => {
-    setRegistrations((prev) => [registration, ...prev]);
-  };
-
-  const handleGenerateData = () => {
-    const includeAnomalies = anomalyType !== "none";
-    const sampleData = generateSampleData(5, includeAnomalies, {
-      type: anomalyType,
-      probability: anomalyProbability[0]
-    });
-    setRegistrations((prev) => [...sampleData, ...prev]);
-  };
 
   const handleGenerateDataset = (newRegistrations: TimeRegistration[]) => {
     setRegistrations((prev) => [...newRegistrations, ...prev]);
@@ -81,14 +65,8 @@ const Index = () => {
                 />
               </div>
             )}
-
-            <Button onClick={handleGenerateData} className="mt-4">
-              Generate Sample Data
-            </Button>
           </div>
         </div>
-        
-        <TimeRegistrationForm onSubmit={handleSubmit} />
         
         <div className="mt-8">
           <h2 className="text-xl font-semibold mb-4">Registrations</h2>
