@@ -11,6 +11,7 @@ interface SortableTableHeaderProps {
     direction: 'asc' | 'desc' | null 
   };
   onSort: (field: keyof TimeRegistration) => void;
+  className?: string;
 }
 
 export const SortableTableHeader = ({
@@ -18,9 +19,10 @@ export const SortableTableHeader = ({
   field,
   currentSort,
   onSort,
+  className,
 }: SortableTableHeaderProps) => {
   return (
-    <TableHead>
+    <TableHead className={className}>
       <div className="space-y-2">
         <Button
           variant="ghost"
