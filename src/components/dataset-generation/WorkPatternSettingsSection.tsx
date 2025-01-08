@@ -10,6 +10,10 @@ interface WorkPatternSettingsSectionProps {
   setNumEndTimes: (value: number[]) => void;
   numBreakDurations: number[];
   setNumBreakDurations: (value: number[]) => void;
+  numWorkCategories: number[];
+  setNumWorkCategories: (value: number[]) => void;
+  minWeekendWorkers: number[];
+  setMinWeekendWorkers: (value: number[]) => void;
 }
 
 export const WorkPatternSettingsSection = ({
@@ -21,6 +25,10 @@ export const WorkPatternSettingsSection = ({
   setNumEndTimes,
   numBreakDurations,
   setNumBreakDurations,
+  numWorkCategories,
+  setNumWorkCategories,
+  minWeekendWorkers,
+  setMinWeekendWorkers,
 }: WorkPatternSettingsSectionProps) => {
   return (
     <div className="space-y-4">
@@ -31,6 +39,30 @@ export const WorkPatternSettingsSection = ({
           onValueChange={setNumDepartments}
           min={1}
           max={4}
+          step={1}
+          className="w-full"
+        />
+      </div>
+
+      <div className="space-y-2">
+        <Label>Number of Work Categories ({numWorkCategories[0]})</Label>
+        <Slider
+          value={numWorkCategories}
+          onValueChange={setNumWorkCategories}
+          min={1}
+          max={4}
+          step={1}
+          className="w-full"
+        />
+      </div>
+
+      <div className="space-y-2">
+        <Label>Minimum Weekend Workers ({minWeekendWorkers[0]})</Label>
+        <Slider
+          value={minWeekendWorkers}
+          onValueChange={setMinWeekendWorkers}
+          min={0}
+          max={20}
           step={1}
           className="w-full"
         />

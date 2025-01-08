@@ -43,6 +43,8 @@ export const DatasetGenerationForm = ({ onGenerate }: DatasetGenerationFormProps
   const [numStartTimes, setNumStartTimes] = useState([2]);
   const [numEndTimes, setNumEndTimes] = useState([2]);
   const [numBreakDurations, setNumBreakDurations] = useState([1]);
+  const [numWorkCategories, setNumWorkCategories] = useState([2]);
+  const [minWeekendWorkers, setMinWeekendWorkers] = useState([0]);
   
   // Time settings
   const [workStartRange, setWorkStartRange] = useState([7, 9]);
@@ -101,7 +103,9 @@ export const DatasetGenerationForm = ({ onGenerate }: DatasetGenerationFormProps
         numDepartments: numDepartments[0],
         numStartTimes: numStartTimes[0],
         numEndTimes: numEndTimes[0],
-        numBreakDurations: numBreakDurations[0]
+        numBreakDurations: numBreakDurations[0],
+        numWorkCategories: numWorkCategories[0],
+        minWeekendWorkers: minWeekendWorkers[0]
       }
     });
 
@@ -149,6 +153,10 @@ export const DatasetGenerationForm = ({ onGenerate }: DatasetGenerationFormProps
             setNumEndTimes={setNumEndTimes}
             numBreakDurations={numBreakDurations}
             setNumBreakDurations={setNumBreakDurations}
+            numWorkCategories={numWorkCategories}
+            setNumWorkCategories={setNumWorkCategories}
+            minWeekendWorkers={minWeekendWorkers}
+            setMinWeekendWorkers={setMinWeekendWorkers}
           />
         </div>
 

@@ -17,6 +17,8 @@ export interface WorkPatternConfig {
   numStartTimes: number;
   numEndTimes: number;
   numBreakDurations: number;
+  numWorkCategories: number;
+  minWeekendWorkers: number;
 }
 
 export interface TimeRegistration {
