@@ -29,12 +29,21 @@ export const EmployeePatternVisualization = ({
     return format(new Date().setHours(hour, 0), "ha");
   };
 
+  const formatBreakDuration = (duration: number) => {
+    const hours = Math.floor(duration);
+    const minutes = (duration % 1) * 60;
+    if (hours === 0) {
+      return `${minutes}min`;
+    }
+    return minutes === 0 ? `${hours}h` : `${hours}h ${minutes}min`;
+  };
+
   return (
     <Card className="w-full">
       <CardHeader>
         <CardTitle>Employee Work Patterns</CardTitle>
         <CardDescription>
-          Overview of allowed work time slots and categories for each employee
+          Overview of allowed work time slots, break durations, and categories for each employee
         </CardDescription>
       </CardHeader>
       <CardContent>
@@ -45,6 +54,7 @@ export const EmployeePatternVisualization = ({
               <TableHead>Department</TableHead>
               <TableHead>Allowed Start Times</TableHead>
               <TableHead>Allowed End Times</TableHead>
+              <TableHead>Break Durations</TableHead>
               <TableHead>Work Categories</TableHead>
               <TableHead>Weekend Work</TableHead>
             </TableRow>
@@ -68,6 +78,15 @@ export const EmployeePatternVisualization = ({
                     {pattern.allowedEndTimes.map((time) => (
                       <Badge key={time} variant="outline">
                         {formatHour(time)}
+                      </Badge>
+                    ))}
+                  </div>
+                </TableCell>
+                <TableCell>
+                  <div className="flex flex-wrap gap-1">
+                    {pattern.allowedBreakDurations.map((duration) => (
+                      <Badge key={duration} variant="outline">
+                        {formatBreakDuration(duration)}
                       </Badge>
                     ))}
                   </div>
