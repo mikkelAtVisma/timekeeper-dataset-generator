@@ -37,6 +37,7 @@ export interface TimeRegistration {
   numericals: Numerical[];
   anomaly?: number;
   anomalyField?: string;
+  employeePattern?: EmployeeWorkPattern;  // Added this line
 }
 
 export interface GenerateDatasetParams {
