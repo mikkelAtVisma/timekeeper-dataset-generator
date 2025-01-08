@@ -29,6 +29,11 @@ const weightedRandomChoice = (options: number[], weights: number[]): number => {
   return options[options.length - 1];
 };
 
+const getUniqueRandomElements = <T>(array: T[], count: number): T[] => {
+  const shuffled = [...array].sort(() => 0.5 - Math.random());
+  return shuffled.slice(0, Math.min(count, array.length));
+};
+
 const generateEmployeeWorkPattern = (
   employeeId: string,
   workStartRange: number[],
@@ -40,24 +45,27 @@ const generateEmployeeWorkPattern = (
   totalEmployees: number,
 ): EmployeeWorkPattern => {
   const allStartTimes = generateTimeIncrements(workStartRange[0], workStartRange[1]);
-  const numStartTimes = Math.min(workPatternConfig.numStartTimes, allStartTimes.length);
-  const allowedStartTimes = allStartTimes
-    .sort(() => Math.random() - 0.5)
-    .slice(0, numStartTimes);
-
   const allEndTimes = generateTimeIncrements(workEndRange[0], workEndRange[1]);
-  const numEndTimes = Math.min(workPatternConfig.numEndTimes, allEndTimes.length);
-  const allowedEndTimes = allEndTimes
-    .sort(() => Math.random() - 0.5)
-    .slice(0, numEndTimes);
+
+  // Get unique random start and end times
+  const allowedStartTimes = getUniqueRandomElements(
+    allStartTimes,
+    workPatternConfig.numStartTimes
+  );
+
+  const allowedEndTimes = getUniqueRandomElements(
+    allEndTimes,
+    workPatternConfig.numEndTimes
+  );
 
   const departmentId = departments[Math.floor(Math.random() * Math.min(departments.length, workPatternConfig.numDepartments))];
 
-  // Ensure we only select the specified number of work categories
-  const shuffledCategories = [...workCategories].sort(() => Math.random() - 0.5);
-  const allowedWorkCategories = shuffledCategories.slice(0, workPatternConfig.numWorkCategories);
+  // Get unique random work categories
+  const allowedWorkCategories = getUniqueRandomElements(
+    workCategories,
+    workPatternConfig.numWorkCategories
+  );
 
-  // Determine if this employee can work weekends based on the minimum requirement
   const remainingEmployees = totalEmployees - parseInt(employeeId.split('-')[1]);
   const remainingRequired = workPatternConfig.minWeekendWorkers - weekendWorkerCount;
   const mustWorkWeekends = remainingRequired > 0 && remainingEmployees <= remainingRequired;
