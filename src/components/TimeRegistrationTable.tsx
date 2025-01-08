@@ -5,7 +5,7 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { TimeRegistration } from "../types/timeRegistration";
-import { useState, useMemo } from "react";
+import { useState, useMemo, useEffect, useRef } from "react";
 import { TableFilters } from "./table/TableFilters";
 import { SortableTableHeader } from "./table/SortableTableHeader";
 import { TimeRegistrationTableBody } from "./table/TimeRegistrationTableBody";
@@ -13,9 +13,15 @@ import { sortRegistrations } from "../utils/sortUtils";
 
 interface TimeRegistrationTableProps {
   registrations: TimeRegistration[];
+  selectedRegistrationId?: string | null;
+  onRegistrationClick?: (registration: TimeRegistration) => void;
 }
 
-export const TimeRegistrationTable = ({ registrations }: TimeRegistrationTableProps) => {
+export const TimeRegistrationTable = ({ 
+  registrations,
+  selectedRegistrationId,
+  onRegistrationClick
+}: TimeRegistrationTableProps) => {
   const [filters, setFilters] = useState({
     date: "all",
     employeeId: "all",
@@ -87,8 +93,19 @@ export const TimeRegistrationTable = ({ registrations }: TimeRegistrationTablePr
     return sortRegistrations(result, sort.field, sort.direction);
   }, [registrations, filters, sort]);
 
+  const tableRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    if (selectedRegistrationId && tableRef.current) {
+      const selectedRow = tableRef.current.querySelector(`[data-registration-id="${selectedRegistrationId}"]`);
+      if (selectedRow) {
+        selectedRow.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      }
+    }
+  }, [selectedRegistrationId]);
+
   return (
-    <div className="rounded-md border">
+    <div className="rounded-md border" ref={tableRef}>
       <Table>
         <TableHeader>
           <TableRow>
@@ -181,7 +198,11 @@ export const TimeRegistrationTable = ({ registrations }: TimeRegistrationTablePr
             </SortableTableHeader>
           </TableRow>
         </TableHeader>
-        <TimeRegistrationTableBody registrations={filteredAndSortedRegistrations} />
+        <TimeRegistrationTableBody 
+          registrations={filteredAndSortedRegistrations}
+          selectedRegistrationId={selectedRegistrationId}
+          onRegistrationClick={onRegistrationClick}
+        />
       </Table>
     </div>
   );

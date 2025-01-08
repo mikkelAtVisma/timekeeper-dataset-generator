@@ -1,4 +1,4 @@
-import React, { useState, useMemo } from "react";
+import React, { useState, useMemo, useEffect, useRef } from "react";
 import { Card, CardContent } from "@/components/ui/card";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { TimeRegistration } from "../types/timeRegistration";
@@ -22,10 +22,17 @@ import {
 
 interface TimeRegistrationCalendarProps {
   registrations: TimeRegistration[];
+  selectedRegistrationId?: string | null;
+  onRegistrationClick?: (registration: TimeRegistration) => void;
 }
 
-export const TimeRegistrationCalendar = ({ registrations }: TimeRegistrationCalendarProps) => {
+export const TimeRegistrationCalendar = ({ 
+  registrations,
+  selectedRegistrationId,
+  onRegistrationClick
+}: TimeRegistrationCalendarProps) => {
   const today = new Date();
+  const scrollAreaRef = useRef<HTMLDivElement>(null);
 
   const getInitialDate = () => {
     return startOfWeek(today, { weekStartsOn: 1 });
@@ -72,6 +79,15 @@ export const TimeRegistrationCalendar = ({ registrations }: TimeRegistrationCale
     return `${severity} anomaly detected in: ${registration.anomalyField}`;
   };
 
+  useEffect(() => {
+    if (selectedRegistrationId && scrollAreaRef.current) {
+      const selectedElement = scrollAreaRef.current.querySelector(`[data-registration-id="${selectedRegistrationId}"]`);
+      if (selectedElement) {
+        selectedElement.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      }
+    }
+  }, [selectedRegistrationId]);
+
   return (
     <div className="space-y-4">
       <div className="flex items-center justify-between">
@@ -98,7 +114,7 @@ export const TimeRegistrationCalendar = ({ registrations }: TimeRegistrationCale
 
       <Card>
         <CardContent className="p-4">
-          <ScrollArea className="h-[600px]">
+          <ScrollArea className="h-[600px]" ref={scrollAreaRef}>
             <div className="min-w-[800px]">
               {dateRanges.map((weekDates, weekIndex) => (
                 <div key={weekIndex} className="mb-4">
@@ -151,13 +167,22 @@ export const TimeRegistrationCalendar = ({ registrations }: TimeRegistrationCale
                                 const anomalyDescription = getAnomalyDescription(registration);
                                 const registrationContent = (
                                   <div 
-                                    className={`text-xs p-1 rounded ${
+                                    data-registration-id={registration.registrationId}
+                                    className={`text-xs p-1 rounded cursor-pointer ${
                                       registration.anomaly 
                                         ? registration.anomaly === 1 
                                           ? 'bg-yellow-200 dark:bg-yellow-900'
                                           : 'bg-red-200 dark:bg-red-900'
                                         : 'bg-accent'
+                                    } ${
+                                      selectedRegistrationId === registration.registrationId
+                                        ? 'ring-2 ring-primary'
+                                        : ''
                                     }`}
+                                    onClick={(e) => {
+                                      e.stopPropagation();
+                                      onRegistrationClick?.(registration);
+                                    }}
                                   >
                                     <div>{registration.workDuration.toFixed(2)}h</div>
                                     <div className="text-muted-foreground text-[10px]">

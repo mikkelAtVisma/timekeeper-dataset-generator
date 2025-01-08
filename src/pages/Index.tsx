@@ -7,9 +7,16 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
 const Index = () => {
   const [registrations, setRegistrations] = useState<TimeRegistration[]>([]);
+  const [selectedRegistrationId, setSelectedRegistrationId] = useState<string | null>(null);
+  const [activeTab, setActiveTab] = useState("list");
 
   const handleGenerateDataset = (newRegistrations: TimeRegistration[]) => {
     setRegistrations((prev) => [...newRegistrations, ...prev]);
+  };
+
+  const handleRegistrationClick = (registration: TimeRegistration, targetView: "list" | "calendar") => {
+    setSelectedRegistrationId(registration.registrationId);
+    setActiveTab(targetView);
   };
 
   return (
@@ -26,16 +33,24 @@ const Index = () => {
         
         <div className="mt-8">
           <h2 className="text-xl font-semibold mb-4">Registrations</h2>
-          <Tabs defaultValue="list" className="w-full">
+          <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
             <TabsList>
               <TabsTrigger value="list">List View</TabsTrigger>
               <TabsTrigger value="calendar">Calendar View</TabsTrigger>
             </TabsList>
             <TabsContent value="list">
-              <TimeRegistrationTable registrations={registrations} />
+              <TimeRegistrationTable 
+                registrations={registrations} 
+                selectedRegistrationId={selectedRegistrationId}
+                onRegistrationClick={(registration) => handleRegistrationClick(registration, "calendar")}
+              />
             </TabsContent>
             <TabsContent value="calendar">
-              <TimeRegistrationCalendar registrations={registrations} />
+              <TimeRegistrationCalendar 
+                registrations={registrations}
+                selectedRegistrationId={selectedRegistrationId}
+                onRegistrationClick={(registration) => handleRegistrationClick(registration, "list")}
+              />
             </TabsContent>
           </Tabs>
         </div>

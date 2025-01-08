@@ -4,9 +4,15 @@ import { TimeRegistration } from "../../types/timeRegistration";
 
 interface TimeRegistrationTableBodyProps {
   registrations: TimeRegistration[];
+  selectedRegistrationId?: string | null;
+  onRegistrationClick?: (registration: TimeRegistration) => void;
 }
 
-export const TimeRegistrationTableBody = ({ registrations }: TimeRegistrationTableBodyProps) => {
+export const TimeRegistrationTableBody = ({ 
+  registrations,
+  selectedRegistrationId,
+  onRegistrationClick
+}: TimeRegistrationTableBodyProps) => {
   const isAnomalous = (reg: TimeRegistration) => {
     return reg.anomaly && reg.anomaly > 0;
   };
@@ -22,7 +28,13 @@ export const TimeRegistrationTableBody = ({ registrations }: TimeRegistrationTab
       {registrations.map((reg) => (
         <TableRow 
           key={`${reg.registrationId}-${reg.date}-${reg.employeeId}`}
-          className={isAnomalous(reg) ? "bg-red-50" : ""}
+          data-registration-id={reg.registrationId}
+          className={`cursor-pointer hover:bg-accent/50 ${
+            isAnomalous(reg) ? "bg-red-50" : ""
+          } ${
+            selectedRegistrationId === reg.registrationId ? "bg-accent" : ""
+          }`}
+          onClick={() => onRegistrationClick?.(reg)}
         >
           <TableCell>
             {isAnomalous(reg) && (
