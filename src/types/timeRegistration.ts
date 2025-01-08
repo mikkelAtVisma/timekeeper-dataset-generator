@@ -53,7 +53,7 @@ export interface GenerateDatasetParams {
   skipWeekends: boolean;
   randomizeAssignments: boolean;
   anomalyConfig: {
-    type: "none" | "weak" | "strong";
+    type: "none" | "weak" | "strong" | "both";
     probability: number;
   };
   existingPatterns?: Map<string, EmployeeWorkPattern>;
