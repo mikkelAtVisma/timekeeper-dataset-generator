@@ -48,8 +48,8 @@ export const TimeRegistrationCalendar = ({ registrations }: TimeRegistrationCale
                         <p className="text-sm text-gray-600">Category: {reg.workCategory}</p>
                       </div>
                       <div className="text-right">
-                        <p className="text-sm text-gray-600">Duration: {reg.workDuration}h</p>
-                        <p className="text-sm text-gray-600">Break: {reg.breakDuration}h</p>
+                        <p className="text-sm text-gray-600">Duration: {reg.workDuration.toFixed(2)}h</p>
+                        <p className="text-sm text-gray-600">Break: {reg.breakDuration.toFixed(2)}h</p>
                       </div>
                     </div>
                   </div>
