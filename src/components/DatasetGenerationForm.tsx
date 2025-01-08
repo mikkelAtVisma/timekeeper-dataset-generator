@@ -1,12 +1,13 @@
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { useToast } from "@/components/ui/use-toast";
-import { TimeRegistration } from "../types/timeRegistration";
+import { TimeRegistration, EmployeeWorkPattern } from "../types/timeRegistration";
 import { startOfWeek, addMonths, format } from "date-fns";
 import { BasicSettingsSection } from "./dataset-generation/BasicSettingsSection";
 import { TimeSettingsSection } from "./dataset-generation/TimeSettingsSection";
 import { AnomalySettingsSection } from "./dataset-generation/AnomalySettingsSection";
 import { generateDataset } from "../utils/datasetGenerator";
+import { EmployeePatternVisualization } from "./EmployeePatternVisualization";
 
 interface DatasetGenerationFormProps {
   onGenerate: (registrations: TimeRegistration[]) => void;
@@ -33,6 +34,7 @@ export const DatasetGenerationForm = ({ onGenerate }: DatasetGenerationFormProps
   const [workCategories] = useState(["Development", "Testing", "Meetings", "Documentation"]);
   const [departments] = useState(["HR", "IT", "Sales", "Marketing"]);
   const [numRegistrations, setNumRegistrations] = useState([35]);
+  const [employeePatterns, setEmployeePatterns] = useState<EmployeeWorkPattern[]>([]);
   
   // Time settings
   const [workStartRange, setWorkStartRange] = useState([7, 9]); // 7-9 AM
@@ -69,7 +71,7 @@ export const DatasetGenerationForm = ({ onGenerate }: DatasetGenerationFormProps
     }
 
     // Generate data using the parameters
-    const registrations = generateDataset({
+    const { registrations, patterns } = generateDataset({
       numEmployees,
       startDate,
       endDate,
@@ -88,6 +90,7 @@ export const DatasetGenerationForm = ({ onGenerate }: DatasetGenerationFormProps
       }
     });
 
+    setEmployeePatterns(patterns);
     onGenerate(registrations);
     
     toast({
@@ -141,6 +144,12 @@ export const DatasetGenerationForm = ({ onGenerate }: DatasetGenerationFormProps
       </div>
 
       <Button type="submit" className="w-full">Generate Dataset</Button>
+
+      {employeePatterns.length > 0 && (
+        <div className="mt-6">
+          <EmployeePatternVisualization patterns={employeePatterns} />
+        </div>
+      )}
     </form>
   );
 };

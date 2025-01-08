@@ -20,6 +20,11 @@ interface GenerateDatasetParams {
   };
 }
 
+interface GenerateDatasetResult {
+  registrations: TimeRegistration[];
+  patterns: EmployeeWorkPattern[];
+}
+
 const generateTimeIncrements = (start: number, end: number, step: number = 0.5): number[] => {
   const times: number[] = [];
   for (let time = start; time <= end; time += step) {
@@ -55,30 +60,25 @@ const generateEmployeeWorkPattern = (
   departments: string[],
   workCategories: string[],
 ): EmployeeWorkPattern => {
-  // Generate a subset of allowed start times
   const allStartTimes = generateTimeIncrements(workStartRange[0], workStartRange[1]);
   const numStartTimes = Math.floor(Math.random() * (allStartTimes.length - 2)) + 2; // At least 2 start times
   const allowedStartTimes = allStartTimes
     .sort(() => Math.random() - 0.5)
     .slice(0, numStartTimes);
 
-  // Generate a subset of allowed end times
   const allEndTimes = generateTimeIncrements(workEndRange[0], workEndRange[1]);
   const numEndTimes = Math.floor(Math.random() * (allEndTimes.length - 2)) + 2; // At least 2 end times
   const allowedEndTimes = allEndTimes
     .sort(() => Math.random() - 0.5)
     .slice(0, numEndTimes);
 
-  // Assign a department
   const departmentId = departments[Math.floor(Math.random() * departments.length)];
 
-  // Generate a subset of allowed work categories
   const numWorkCategories = Math.floor(Math.random() * (workCategories.length - 1)) + 1; // At least 1 category
   const allowedWorkCategories = workCategories
     .sort(() => Math.random() - 0.5)
     .slice(0, numWorkCategories);
 
-  // 20% chance of being allowed to work weekends
   const canWorkWeekends = Math.random() < 0.2;
 
   return {
@@ -91,7 +91,7 @@ const generateEmployeeWorkPattern = (
   };
 };
 
-export const generateDataset = (params: GenerateDatasetParams): TimeRegistration[] => {
+export const generateDataset = (params: GenerateDatasetParams): GenerateDatasetResult => {
   const {
     numEmployees,
     startDate,
@@ -113,14 +113,12 @@ export const generateDataset = (params: GenerateDatasetParams): TimeRegistration
   const end = new Date(endDate);
   const dateRange = [];
   
-  // Generate date range
   for (let d = new Date(start); d <= end; d.setDate(d.getDate() + 1)) {
     if (!skipWeekends || (d.getDay() !== 0 && d.getDay() !== 6)) {
       dateRange.push(new Date(d));
     }
   }
 
-  // Generate work patterns for each employee
   const employeeWorkPatterns: EmployeeWorkPattern[] = [];
   for (let empIdx = 0; empIdx < numEmployees; empIdx++) {
     const employeeId = `employee-${empIdx}`;
@@ -134,7 +132,6 @@ export const generateDataset = (params: GenerateDatasetParams): TimeRegistration
     employeeWorkPatterns.push(workPattern);
   }
 
-  // Generate registrations for each employee according to their work pattern
   for (const workPattern of employeeWorkPatterns) {
     for (let i = 0; i < numRegistrationsPerEmployee; i++) {
       let date;
@@ -150,7 +147,6 @@ export const generateDataset = (params: GenerateDatasetParams): TimeRegistration
         Math.floor(Math.random() * workPattern.allowedEndTimes.length)
       ];
 
-      // Ensure end time is after start time
       const actualEndTime = endTime <= startTime ? startTime + 8 : endTime;
 
       const breakTimes = generateTimeIncrements(breakDurationRange[0], breakDurationRange[1], 0.5);
@@ -179,10 +175,15 @@ export const generateDataset = (params: GenerateDatasetParams): TimeRegistration
     }
   }
 
-  // Apply anomalies if configured
   if (anomalyConfig.type !== "none") {
-    return injectAnomalies(registrations, anomalyConfig);
+    return {
+      registrations: injectAnomalies(registrations, anomalyConfig),
+      patterns: employeeWorkPatterns
+    };
   }
 
-  return registrations;
+  return {
+    registrations,
+    patterns: employeeWorkPatterns
+  };
 };
