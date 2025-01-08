@@ -1,5 +1,4 @@
 import { TimeRegistration } from "../types/timeRegistration";
-import { injectAnomalies } from "./anomalyGenerator";
 
 const generateRegistrationId = () => `reg-${Math.floor(Math.random() * 10000)}`;
 const generateEmployeeId = () => `employee-${Math.floor(Math.random() * 5)}`;
@@ -23,7 +22,7 @@ export const generateSampleData = (
     const breakDuration = Math.random() * 2; // 0-2 hours break
     const workDuration = endTime - startTime - breakDuration;
 
-    return {
+    const registration: TimeRegistration = {
       registrationId: generateRegistrationId(),
       date: new Date(2024, Math.floor(Math.random() * 12), Math.floor(Math.random() * 28) + 1)
         .toISOString()
@@ -47,18 +46,39 @@ export const generateSampleData = (
           value: Math.floor(Math.random() * 100),
         },
       ],
-      anomaly: 0, // Default to no anomaly
+      anomaly: 0,
     };
-  });
 
-  if (includeAnomalies && anomalyConfig) {
-    const anomalyValue = anomalyConfig.type === "weak" ? 1 : 2;
-    registrations.forEach(reg => {
-      if (Math.random() < anomalyConfig.probability) {
-        reg.anomaly = anomalyValue;
+    if (includeAnomalies && anomalyConfig && Math.random() < anomalyConfig.probability) {
+      const anomalyValue = anomalyConfig.type === "weak" ? 1 : 2;
+      const aspects = ["workDuration", "breakDuration", "startTime", "endTime", "numericals"];
+      const anomalousAspect = aspects[Math.floor(Math.random() * aspects.length)];
+      
+      registration.anomaly = anomalyValue;
+      registration.anomalyField = anomalousAspect;
+
+      // Introduce the anomaly
+      switch (anomalousAspect) {
+        case "workDuration":
+          registration.workDuration += anomalyValue * 2;
+          break;
+        case "breakDuration":
+          registration.breakDuration += anomalyValue;
+          break;
+        case "startTime":
+          registration.startTime += anomalyValue * 2;
+          break;
+        case "endTime":
+          registration.endTime += anomalyValue * 2;
+          break;
+        case "numericals":
+          registration.numericals[0].value += anomalyValue * 10;
+          break;
       }
-    });
-  }
+    }
+
+    return registration;
+  });
 
   return registrations;
 };
