@@ -9,16 +9,10 @@ import {
   eachDayOfInterval,
   isSameMonth,
   addWeeks,
-  addMonths,
 } from "date-fns";
-import { ChevronLeft, ChevronRight } from "lucide-react";
-import { Button } from "./ui/button";
-import {
-  Tooltip,
-  TooltipContent,
-  TooltipProvider,
-  TooltipTrigger,
-} from "@/components/ui/tooltip";
+import { CalendarHeader } from "./calendar/CalendarHeader";
+import { RegistrationCell } from "./calendar/RegistrationCell";
+import { getInitialDate } from "@/utils/dateUtils";
 
 interface TimeRegistrationCalendarProps {
   registrations: TimeRegistration[];
@@ -31,14 +25,10 @@ export const TimeRegistrationCalendar = ({
   selectedRegistrationId,
   onRegistrationClick
 }: TimeRegistrationCalendarProps) => {
-  const today = new Date();
   const scrollAreaRef = useRef<HTMLDivElement>(null);
-
-  const getInitialDate = () => {
-    return startOfWeek(today, { weekStartsOn: 1 });
-  };
-
-  const [selectedDate, setSelectedDate] = useState<Date>(getInitialDate());
+  const [selectedDate, setSelectedDate] = useState<Date>(() => 
+    getInitialDate(registrations, selectedRegistrationId)
+  );
 
   const employees = useMemo(() => {
     const employeeIds = new Set(registrations.map(reg => reg.employeeId));
@@ -46,13 +36,9 @@ export const TimeRegistrationCalendar = ({
   }, [registrations]);
 
   const dateRanges = useMemo(() => {
-    const monthStart = selectedDate;
-    const monthEnd = addMonths(monthStart, 1);
-    const firstWeekStart = monthStart;
     const weeksToShow = 4;
-    
     return Array.from({ length: weeksToShow }, (_, weekIndex) => {
-      const weekStart = addWeeks(firstWeekStart, weekIndex);
+      const weekStart = addWeeks(selectedDate, weekIndex);
       return eachDayOfInterval({
         start: weekStart,
         end: endOfWeek(weekStart, { weekStartsOn: 1 })
@@ -73,15 +59,23 @@ export const TimeRegistrationCalendar = ({
     setSelectedDate(newDate);
   };
 
-  const getAnomalyDescription = (registration: TimeRegistration) => {
-    if (!registration.anomaly) return null;
-    const severity = registration.anomaly === 1 ? "Weak" : "Strong";
-    return `${severity} anomaly detected in: ${registration.anomalyField}`;
-  };
+  useEffect(() => {
+    // Update selected date when a new registration is selected
+    if (selectedRegistrationId) {
+      const selectedRegistration = registrations.find(
+        reg => reg.registrationId === selectedRegistrationId
+      );
+      if (selectedRegistration) {
+        setSelectedDate(new Date(selectedRegistration.date));
+      }
+    }
+  }, [selectedRegistrationId, registrations]);
 
   useEffect(() => {
     if (selectedRegistrationId && scrollAreaRef.current) {
-      const selectedElement = scrollAreaRef.current.querySelector(`[data-registration-id="${selectedRegistrationId}"]`);
+      const selectedElement = scrollAreaRef.current.querySelector(
+        `[data-registration-id="${selectedRegistrationId}"]`
+      );
       if (selectedElement) {
         selectedElement.scrollIntoView({ behavior: 'smooth', block: 'center' });
       }
@@ -90,27 +84,10 @@ export const TimeRegistrationCalendar = ({
 
   return (
     <div className="space-y-4">
-      <div className="flex items-center justify-between">
-        <div className="flex items-center gap-4">
-          <Button
-            variant="outline"
-            size="icon"
-            onClick={() => navigateDate('prev')}
-          >
-            <ChevronLeft className="h-4 w-4" />
-          </Button>
-          <h3 className="text-lg font-semibold">
-            {format(selectedDate, 'MMMM yyyy')}
-          </h3>
-          <Button
-            variant="outline"
-            size="icon"
-            onClick={() => navigateDate('next')}
-          >
-            <ChevronRight className="h-4 w-4" />
-          </Button>
-        </div>
-      </div>
+      <CalendarHeader 
+        selectedDate={selectedDate}
+        onNavigate={navigateDate}
+      />
 
       <Card>
         <CardContent className="p-4">
@@ -130,7 +107,7 @@ export const TimeRegistrationCalendar = ({
                             ? 'text-muted-foreground'
                             : ''
                         } ${
-                          format(date, 'yyyy-MM-dd') === format(today, 'yyyy-MM-dd')
+                          format(date, 'yyyy-MM-dd') === format(new Date(), 'yyyy-MM-dd')
                             ? 'bg-accent text-accent-foreground'
                             : 'bg-muted'
                         }`}
@@ -163,49 +140,14 @@ export const TimeRegistrationCalendar = ({
                             }`}
                           >
                             <div className="flex flex-col gap-1">
-                              {dayRegistrations.map((registration) => {
-                                const anomalyDescription = getAnomalyDescription(registration);
-                                const registrationContent = (
-                                  <div 
-                                    data-registration-id={registration.registrationId}
-                                    className={`text-xs p-1 rounded cursor-pointer ${
-                                      registration.anomaly 
-                                        ? registration.anomaly === 1 
-                                          ? 'bg-yellow-200 dark:bg-yellow-900'
-                                          : 'bg-red-200 dark:bg-red-900'
-                                        : 'bg-accent'
-                                    } ${
-                                      selectedRegistrationId === registration.registrationId
-                                        ? 'ring-2 ring-primary'
-                                        : ''
-                                    }`}
-                                    onClick={(e) => {
-                                      e.stopPropagation();
-                                      onRegistrationClick?.(registration);
-                                    }}
-                                  >
-                                    <div>{registration.workDuration.toFixed(2)}h</div>
-                                    <div className="text-muted-foreground text-[10px]">
-                                      {registration.workCategory}
-                                    </div>
-                                  </div>
-                                );
-
-                                return anomalyDescription ? (
-                                  <Tooltip key={registration.registrationId}>
-                                    <TooltipTrigger asChild>
-                                      {registrationContent}
-                                    </TooltipTrigger>
-                                    <TooltipContent>
-                                      <p>{anomalyDescription}</p>
-                                    </TooltipContent>
-                                  </Tooltip>
-                                ) : (
-                                  <div key={registration.registrationId}>
-                                    {registrationContent}
-                                  </div>
-                                );
-                              })}
+                              {dayRegistrations.map((registration) => (
+                                <RegistrationCell
+                                  key={registration.registrationId}
+                                  registration={registration}
+                                  isSelected={selectedRegistrationId === registration.registrationId}
+                                  onClick={onRegistrationClick || (() => {})}
+                                />
+                              ))}
                             </div>
                           </div>
                         );
