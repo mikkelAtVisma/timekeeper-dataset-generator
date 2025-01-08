@@ -3,6 +3,15 @@ export interface Numerical {
   value: number;
 }
 
+export interface EmployeeWorkPattern {
+  employeeId: string;
+  allowedStartTimes: number[];
+  allowedEndTimes: number[];
+  departmentId: string;
+  allowedWorkCategories: string[];
+  canWorkWeekends: boolean;
+}
+
 export interface TimeRegistration {
   registrationId: string;
   date: string;
@@ -16,6 +25,6 @@ export interface TimeRegistration {
   breakDuration: number;
   publicHoliday: boolean;
   numericals: Numerical[];
-  anomaly?: number; // 0 for normal, 1 for weak anomaly, 2 for strong anomaly
-  anomalyField?: string; // Stores which field is anomalous
+  anomaly?: number;
+  anomalyField?: string;
 }
