@@ -111,12 +111,11 @@ export const generateDataset = (params: GenerateDatasetParams): { registrations:
   const registrations: TimeRegistration[] = [];
   const start = new Date(startDate);
   const end = new Date(endDate);
-  const dateRange = [];
   
+  // Generate all possible dates within range
+  const allDateRange = [];
   for (let d = new Date(start); d <= end; d.setDate(d.getDate() + 1)) {
-    if (!skipWeekends || (d.getDay() !== 0 && d.getDay() !== 6)) {
-      dateRange.push(new Date(d));
-    }
+    allDateRange.push(new Date(d));
   }
 
   // Create a map to store work patterns by employee ID
@@ -127,7 +126,6 @@ export const generateDataset = (params: GenerateDatasetParams): { registrations:
   for (let empIdx = 0; empIdx < numEmployees; empIdx++) {
     const employeeId = `employee-${empIdx}`;
     
-    // Check if a pattern already exists for this employee
     if (!employeeWorkPatternsMap.has(employeeId)) {
       const workPattern = generateEmployeeWorkPattern(
         employeeId,
@@ -152,11 +150,22 @@ export const generateDataset = (params: GenerateDatasetParams): { registrations:
 
   // Generate registrations using the stored patterns
   for (const workPattern of employeeWorkPatterns) {
+    let availableDates = [...allDateRange];
+    
+    // Filter out weekends if employee can't work weekends and skipWeekends is true
+    if (skipWeekends && !workPattern.canWorkWeekends) {
+      availableDates = availableDates.filter(date => date.getDay() !== 0 && date.getDay() !== 6);
+    }
+
+    // Generate the requested number of registrations for this employee
     for (let i = 0; i < numRegistrationsPerEmployee; i++) {
-      let date;
-      do {
-        date = dateRange[Math.floor(Math.random() * dateRange.length)];
-      } while (!workPattern.canWorkWeekends && (date.getDay() === 0 || date.getDay() === 6));
+      if (availableDates.length === 0) break;
+
+      // Randomly select a date from available dates
+      const randomIndex = Math.floor(Math.random() * availableDates.length);
+      const date = availableDates[randomIndex];
+      // Remove the used date to prevent duplicates
+      availableDates.splice(randomIndex, 1);
 
       const startTime = workPattern.allowedStartTimes[
         Math.floor(Math.random() * workPattern.allowedStartTimes.length)
