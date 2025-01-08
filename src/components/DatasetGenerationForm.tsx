@@ -38,13 +38,13 @@ export const DatasetGenerationForm = ({ onGenerate }: DatasetGenerationFormProps
   const [employeePatterns, setEmployeePatterns] = useState<EmployeeWorkPattern[]>([]);
   const [existingPatterns, setExistingPatterns] = useState<Map<string, EmployeeWorkPattern>>(new Map());
   
-  // Work Pattern settings
+  // Work Pattern settings - Updated all initial values to [1]
   const [numDepartments, setNumDepartments] = useState([1]);
-  const [numStartTimes, setNumStartTimes] = useState([2]);
-  const [numEndTimes, setNumEndTimes] = useState([2]);
+  const [numStartTimes, setNumStartTimes] = useState([1]);
+  const [numEndTimes, setNumEndTimes] = useState([1]);
   const [numBreakDurations, setNumBreakDurations] = useState([1]);
-  const [numWorkCategories, setNumWorkCategories] = useState([2]);
-  const [minWeekendWorkers, setMinWeekendWorkers] = useState([0]);
+  const [numWorkCategories, setNumWorkCategories] = useState([1]);
+  const [minWeekendWorkers, setMinWeekendWorkers] = useState([1]);
   
   // Time settings
   const [workStartRange, setWorkStartRange] = useState([7, 9]);
