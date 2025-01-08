@@ -1,4 +1,5 @@
 import { TimeRegistration } from "../types/timeRegistration";
+import { injectAnomalies } from "./anomalyGenerator";
 
 const generateRegistrationId = () => `reg-${Math.floor(Math.random() * 10000)}`;
 const generateEmployeeId = () => `employee-${Math.floor(Math.random() * 5)}`;
@@ -6,8 +7,8 @@ const generateProjectId = () => ["A", "B", "C", "D"][Math.floor(Math.random() * 
 const generateDepartmentId = () => ["HR", "IT", "Sales", "Marketing"][Math.floor(Math.random() * 4)];
 const generateWorkCategory = () => `${Math.floor(Math.random() * 200)}`;
 
-export const generateSampleData = (count: number = 10): TimeRegistration[] => {
-  return Array.from({ length: count }, () => {
+export const generateSampleData = (count: number = 10, includeAnomalies: boolean = false): TimeRegistration[] => {
+  const registrations = Array.from({ length: count }, () => {
     const startTime = Math.floor(Math.random() * 12) + 6; // 6 AM to 6 PM
     const endTime = startTime + Math.floor(Math.random() * 8) + 4; // 4-12 hours later
     const breakDuration = Math.random() * 2; // 0-2 hours break
@@ -39,4 +40,6 @@ export const generateSampleData = (count: number = 10): TimeRegistration[] => {
       ],
     };
   });
+
+  return includeAnomalies ? injectAnomalies(registrations) : registrations;
 };
