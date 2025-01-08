@@ -1,30 +1,5 @@
-import { TimeRegistration, EmployeeWorkPattern } from "../types/timeRegistration";
+import { TimeRegistration, EmployeeWorkPattern, GenerateDatasetParams } from "../types/timeRegistration";
 import { injectAnomalies } from "./anomalyGenerator";
-
-interface GenerateDatasetParams {
-  numEmployees: number;
-  startDate: string;
-  endDate: string;
-  projects: string[];
-  workCategories: string[];
-  departments: string[];
-  numRegistrationsPerEmployee: number;
-  workStartRange: number[];
-  workEndRange: number[];
-  breakDurationRange: number[];
-  skipWeekends: boolean;
-  randomizeAssignments: boolean;
-  anomalyConfig: {
-    type: "none" | "weak" | "strong";
-    probability: number;
-  };
-  existingPatterns?: Map<string, EmployeeWorkPattern>;
-}
-
-interface GenerateDatasetResult {
-  registrations: TimeRegistration[];
-  patterns: EmployeeWorkPattern[];
-}
 
 const generateTimeIncrements = (start: number, end: number, step: number = 0.5): number[] => {
   const times: number[] = [];
@@ -60,27 +35,33 @@ const generateEmployeeWorkPattern = (
   workEndRange: number[],
   departments: string[],
   workCategories: string[],
+  workPatternConfig: WorkPatternConfig,
+  weekendWorkerCount: number,
+  totalEmployees: number,
 ): EmployeeWorkPattern => {
   const allStartTimes = generateTimeIncrements(workStartRange[0], workStartRange[1]);
-  const numStartTimes = Math.floor(Math.random() * (allStartTimes.length - 2)) + 2; // At least 2 start times
+  const numStartTimes = Math.min(workPatternConfig.numStartTimes, allStartTimes.length);
   const allowedStartTimes = allStartTimes
     .sort(() => Math.random() - 0.5)
     .slice(0, numStartTimes);
 
   const allEndTimes = generateTimeIncrements(workEndRange[0], workEndRange[1]);
-  const numEndTimes = Math.floor(Math.random() * (allEndTimes.length - 2)) + 2; // At least 2 end times
+  const numEndTimes = Math.min(workPatternConfig.numEndTimes, allEndTimes.length);
   const allowedEndTimes = allEndTimes
     .sort(() => Math.random() - 0.5)
     .slice(0, numEndTimes);
 
-  const departmentId = departments[Math.floor(Math.random() * departments.length)];
+  const departmentId = departments[Math.floor(Math.random() * Math.min(departments.length, workPatternConfig.numDepartments))];
 
-  const numWorkCategories = Math.floor(Math.random() * (workCategories.length - 1)) + 1; // At least 1 category
-  const allowedWorkCategories = workCategories
-    .sort(() => Math.random() - 0.5)
-    .slice(0, numWorkCategories);
+  // Ensure we only select the specified number of work categories
+  const shuffledCategories = [...workCategories].sort(() => Math.random() - 0.5);
+  const allowedWorkCategories = shuffledCategories.slice(0, workPatternConfig.numWorkCategories);
 
-  const canWorkWeekends = Math.random() < 0.2;
+  // Determine if this employee can work weekends based on the minimum requirement
+  const remainingEmployees = totalEmployees - parseInt(employeeId.split('-')[1]);
+  const remainingRequired = workPatternConfig.minWeekendWorkers - weekendWorkerCount;
+  const mustWorkWeekends = remainingRequired > 0 && remainingEmployees <= remainingRequired;
+  const canWorkWeekends = mustWorkWeekends || (Math.random() < 0.2 && weekendWorkerCount < workPatternConfig.minWeekendWorkers);
 
   return {
     employeeId,
@@ -92,7 +73,7 @@ const generateEmployeeWorkPattern = (
   };
 };
 
-export const generateDataset = (params: GenerateDatasetParams): GenerateDatasetResult => {
+export const generateDataset = (params: GenerateDatasetParams): { registrations: TimeRegistration[], patterns: EmployeeWorkPattern[] } => {
   const {
     numEmployees,
     startDate,
@@ -108,6 +89,7 @@ export const generateDataset = (params: GenerateDatasetParams): GenerateDatasetR
     randomizeAssignments,
     anomalyConfig,
     existingPatterns = new Map(),
+    workPatternConfig,
   } = params;
 
   const registrations: TimeRegistration[] = [];
@@ -123,6 +105,7 @@ export const generateDataset = (params: GenerateDatasetParams): GenerateDatasetR
 
   // Create a map to store work patterns by employee ID
   const employeeWorkPatternsMap = new Map<string, EmployeeWorkPattern>(existingPatterns);
+  let weekendWorkerCount = 0;
 
   // Generate or retrieve work patterns for each employee
   for (let empIdx = 0; empIdx < numEmployees; empIdx++) {
@@ -135,8 +118,14 @@ export const generateDataset = (params: GenerateDatasetParams): GenerateDatasetR
         workStartRange,
         workEndRange,
         departments,
-        workCategories
+        workCategories,
+        workPatternConfig,
+        weekendWorkerCount,
+        numEmployees
       );
+      if (workPattern.canWorkWeekends) {
+        weekendWorkerCount++;
+      }
       employeeWorkPatternsMap.set(employeeId, workPattern);
     }
   }
