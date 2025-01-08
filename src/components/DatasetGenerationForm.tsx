@@ -55,7 +55,7 @@ export const DatasetGenerationForm = ({ onGenerate, onClear }: DatasetGeneration
   const [randomizeAssignments, setRandomizeAssignments] = useState(true);
 
   // Anomaly settings
-  const [anomalyType, setAnomalyType] = useState<"none" | "weak" | "strong">("none");
+  const [anomalyType, setAnomalyType] = useState<"none" | "weak" | "strong" | "both">("none");
   const [anomalyProbability, setAnomalyProbability] = useState([0.33]);
 
   // Clear patterns when onClear is called

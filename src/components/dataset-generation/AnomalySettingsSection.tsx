@@ -1,10 +1,10 @@
 import { Label } from "@/components/ui/label";
-import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
+import { Checkbox } from "@/components/ui/checkbox";
 import { Slider } from "@/components/ui/slider";
 
 interface AnomalySettingsSectionProps {
-  anomalyType: "none" | "weak" | "strong";
-  setAnomalyType: (value: "none" | "weak" | "strong") => void;
+  anomalyType: "none" | "weak" | "strong" | "both";
+  setAnomalyType: (value: "none" | "weak" | "strong" | "both") => void;
   anomalyProbability: number[];
   setAnomalyProbability: (value: number[]) => void;
 }
@@ -17,26 +17,42 @@ export const AnomalySettingsSection = ({
 }: AnomalySettingsSectionProps) => {
   return (
     <div className="space-y-4">
-      <div>
+      <div className="space-y-2">
         <Label>Anomaly Type</Label>
-        <RadioGroup
-          value={anomalyType}
-          onValueChange={(value) => setAnomalyType(value as "none" | "weak" | "strong")}
-          className="flex space-x-4"
-        >
+        <div className="flex flex-col space-y-2">
           <div className="flex items-center space-x-2">
-            <RadioGroupItem value="none" id="none" />
+            <Checkbox 
+              id="none" 
+              checked={anomalyType === "none"}
+              onCheckedChange={() => setAnomalyType("none")}
+            />
             <Label htmlFor="none">No Anomalies</Label>
           </div>
           <div className="flex items-center space-x-2">
-            <RadioGroupItem value="weak" id="weak" />
-            <Label htmlFor="weak">Weak Anomalies</Label>
+            <Checkbox 
+              id="weak" 
+              checked={anomalyType === "weak"}
+              onCheckedChange={() => setAnomalyType("weak")}
+            />
+            <Label htmlFor="weak">Weak Anomalies Only</Label>
           </div>
           <div className="flex items-center space-x-2">
-            <RadioGroupItem value="strong" id="strong" />
-            <Label htmlFor="strong">Strong Anomalies</Label>
+            <Checkbox 
+              id="strong" 
+              checked={anomalyType === "strong"}
+              onCheckedChange={() => setAnomalyType("strong")}
+            />
+            <Label htmlFor="strong">Strong Anomalies Only</Label>
           </div>
-        </RadioGroup>
+          <div className="flex items-center space-x-2">
+            <Checkbox 
+              id="both" 
+              checked={anomalyType === "both"}
+              onCheckedChange={() => setAnomalyType("both")}
+            />
+            <Label htmlFor="both">Both Weak and Strong Anomalies (50/50 chance)</Label>
+          </div>
+        </div>
       </div>
 
       {anomalyType !== "none" && (

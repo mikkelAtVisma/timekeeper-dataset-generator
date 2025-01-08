@@ -1,10 +1,10 @@
 import { TimeRegistration, Numerical } from "../types/timeRegistration";
 
-type AnomalyType = "weak" | "strong";
+type AnomalyType = "weak" | "strong" | "both";
 
 export const injectAnomalies = (
   registrations: TimeRegistration[],
-  config: { type: "none" | "weak" | "strong"; probability: number }
+  config: { type: "none" | "weak" | "strong" | "both"; probability: number }
 ): TimeRegistration[] => {
   return registrations.map(registration => {
     const shouldInjectAnomaly = Math.random() < config.probability;
@@ -13,7 +13,12 @@ export const injectAnomalies = (
       return registration;
     }
     
-    if (config.type === "weak") {
+    if (config.type === "both") {
+      // 50% chance for each type when "both" is selected
+      return Math.random() < 0.5 ? 
+        introduceWeakAnomaly(registration) : 
+        introduceStrongAnomaly(registration);
+    } else if (config.type === "weak") {
       return introduceWeakAnomaly(registration);
     } else if (config.type === "strong") {
       return introduceStrongAnomaly(registration);
