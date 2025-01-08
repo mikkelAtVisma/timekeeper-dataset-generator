@@ -7,11 +7,8 @@ import {
   startOfWeek, 
   endOfWeek, 
   eachDayOfInterval, 
-  startOfMonth, 
-  endOfMonth, 
-  addWeeks,
   isSameMonth,
-  getWeeksInMonth,
+  addWeeks,
   addMonths,
 } from "date-fns";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
@@ -26,9 +23,8 @@ interface TimeRegistrationCalendarProps {
 type ViewMode = "week" | "month";
 
 export const TimeRegistrationCalendar = ({ registrations }: TimeRegistrationCalendarProps) => {
-  const today = new Date(); // Define today variable
+  const today = new Date();
 
-  // Get the Monday of the current week
   const getInitialDate = () => {
     return startOfWeek(today, { weekStartsOn: 1 });
   };
@@ -36,13 +32,11 @@ export const TimeRegistrationCalendar = ({ registrations }: TimeRegistrationCale
   const [selectedDate, setSelectedDate] = useState<Date>(getInitialDate());
   const [viewMode, setViewMode] = useState<ViewMode>("week");
 
-  // Get unique employee IDs
   const employees = useMemo(() => {
     const employeeIds = new Set(registrations.map(reg => reg.employeeId));
     return Array.from(employeeIds).sort();
   }, [registrations]);
 
-  // Get date range based on view mode
   const dateRanges = useMemo(() => {
     if (viewMode === "week") {
       return [eachDayOfInterval({
@@ -50,7 +44,6 @@ export const TimeRegistrationCalendar = ({ registrations }: TimeRegistrationCale
         end: endOfWeek(selectedDate, { weekStartsOn: 1 })
       })];
     } else {
-      // For month view, start from the Monday and show 4 weeks
       const monthStart = selectedDate;
       const monthEnd = addMonths(monthStart, 1);
       const firstWeekStart = monthStart;
@@ -66,9 +59,8 @@ export const TimeRegistrationCalendar = ({ registrations }: TimeRegistrationCale
     }
   }, [selectedDate, viewMode]);
 
-  // Get registrations for a specific employee and date
-  const getRegistrationForDate = (employeeId: string, date: Date) => {
-    return registrations.find(reg => 
+  const getRegistrationsForDate = (employeeId: string, date: Date) => {
+    return registrations.filter(reg => 
       reg.employeeId === employeeId && 
       reg.date === format(date, 'yyyy-MM-dd')
     );
@@ -79,7 +71,6 @@ export const TimeRegistrationCalendar = ({ registrations }: TimeRegistrationCale
     if (viewMode === 'week') {
       newDate.setDate(newDate.getDate() + (direction === 'next' ? 7 : -7));
     } else {
-      // For month view, navigate by 4 weeks
       newDate.setDate(newDate.getDate() + (direction === 'next' ? 28 : -28));
     }
     setSelectedDate(newDate);
@@ -129,7 +120,6 @@ export const TimeRegistrationCalendar = ({ registrations }: TimeRegistrationCale
             <div className="min-w-[800px]">
               {dateRanges.map((weekDates, weekIndex) => (
                 <div key={weekIndex} className="mb-4">
-                  {/* Header row with dates for each week */}
                   <div className="grid grid-cols-[200px_repeat(7,1fr)] gap-2 mb-2">
                     <div className="font-semibold">
                       {viewMode === 'month' && `Week ${weekIndex + 1}`}
@@ -155,7 +145,6 @@ export const TimeRegistrationCalendar = ({ registrations }: TimeRegistrationCale
                     ))}
                   </div>
 
-                  {/* Grid rows for each employee */}
                   {employees.map((employeeId) => (
                     <div 
                       key={`${weekIndex}-${employeeId}`}
@@ -163,26 +152,33 @@ export const TimeRegistrationCalendar = ({ registrations }: TimeRegistrationCale
                     >
                       <div className="font-medium p-2">{employeeId}</div>
                       {weekDates.map((date) => {
-                        const registration = getRegistrationForDate(employeeId, date);
+                        const dayRegistrations = getRegistrationsForDate(employeeId, date);
                         return (
                           <div 
                             key={date.toISOString()}
-                            className={`p-2 text-center border rounded ${
+                            className={`p-2 text-center border rounded min-h-[80px] ${
                               !isSameMonth(date, selectedDate) && viewMode === 'month'
                                 ? 'bg-muted/50'
-                                : registration 
-                                  ? 'bg-accent' 
+                                : dayRegistrations.length > 0
+                                  ? 'bg-accent/20' 
                                   : 'bg-background'
                             }`}
                           >
-                            {registration && (
-                              <div className="text-xs">
-                                <div>{registration.workDuration.toFixed(2)}h</div>
-                                <div className="text-muted-foreground">
-                                  {registration.workCategory}
+                            <div className="flex flex-col gap-1">
+                              {dayRegistrations.map((registration, idx) => (
+                                <div 
+                                  key={registration.registrationId} 
+                                  className={`text-xs p-1 rounded bg-accent ${
+                                    idx > 0 ? 'mt-1' : ''
+                                  }`}
+                                >
+                                  <div>{registration.workDuration.toFixed(2)}h</div>
+                                  <div className="text-muted-foreground text-[10px]">
+                                    {registration.workCategory}
+                                  </div>
                                 </div>
-                              </div>
-                            )}
+                              ))}
+                            </div>
                           </div>
                         );
                       })}
