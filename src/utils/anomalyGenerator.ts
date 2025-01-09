@@ -119,7 +119,8 @@ const introduceStrongAnomaly = (registration: TimeRegistration): TimeRegistratio
       const currentDay = date.getDay();
       const isWeekend = currentDay === 0 || currentDay === 6;
       
-      if (!isWeekend) {
+      // Only introduce weekend anomaly if the employee doesn't have a weekend work pattern
+      if (!isWeekend && !registration.employeePattern?.canWorkWeekends) {
         // If it's a weekday, move to the next Saturday
         const daysUntilSaturday = 6 - currentDay;
         date.setDate(date.getDate() + daysUntilSaturday);
