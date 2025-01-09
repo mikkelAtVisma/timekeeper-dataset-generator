@@ -36,9 +36,13 @@ const adjustTimeValue = (
 ): number => {
   const adjustment = strength === "weak" ? 1 : 3;
   if (currentValue - minValue < maxValue - currentValue) {
-    return currentValue - adjustment;
+    return Math.max(minValue, currentValue - adjustment);
   }
-  return currentValue + adjustment;
+  return Math.min(maxValue, currentValue + adjustment);
+};
+
+const recalculateWorkDuration = (startTime: number, endTime: number, breakDuration: number): number => {
+  return Math.max(0, endTime - startTime - breakDuration);
 };
 
 const introduceWeakAnomaly = (registration: TimeRegistration): TimeRegistration => {
@@ -47,27 +51,34 @@ const introduceWeakAnomaly = (registration: TimeRegistration): TimeRegistration 
   const reg = { ...registration };
 
   switch (aspect) {
-    case "startTime":
+    case "startTime": {
       reg.startTime = adjustTimeValue(reg.startTime, 6, 12, "weak");
+      reg.workDuration = recalculateWorkDuration(reg.startTime, reg.endTime, reg.breakDuration);
       reg.anomaly = 1;
       reg.anomalyField = "Start Time";
       break;
-    case "endTime":
+    }
+    case "endTime": {
       reg.endTime = adjustTimeValue(reg.endTime, 14, 20, "weak");
+      reg.workDuration = recalculateWorkDuration(reg.startTime, reg.endTime, reg.breakDuration);
       reg.anomaly = 1;
       reg.anomalyField = "End Time";
       break;
-    case "breakDuration":
+    }
+    case "breakDuration": {
       reg.breakDuration = Number((reg.breakDuration + (Math.random() < 0.5 ? 0.5 : -0.5)).toFixed(1));
+      reg.workDuration = recalculateWorkDuration(reg.startTime, reg.endTime, reg.breakDuration);
       reg.anomaly = 1;
       reg.anomalyField = "Break Duration";
       break;
-    case "workDuration":
+    }
+    case "workDuration": {
       reg.workDuration = Number((reg.workDuration + (Math.random() < 0.5 ? 1 : -1)).toFixed(1));
       reg.anomaly = 1;
       reg.anomalyField = "Work Duration";
       break;
-    case "numerical":
+    }
+    case "numerical": {
       if (reg.numericals.length > 0) {
         const numericalIndex = Math.floor(Math.random() * reg.numericals.length);
         const numerical = reg.numericals[numericalIndex];
@@ -76,11 +87,13 @@ const introduceWeakAnomaly = (registration: TimeRegistration): TimeRegistration 
         reg.anomalyField = `Numerical (${numerical.name})`;
       }
       break;
-    case "project":
+    }
+    case "project": {
       reg.projectId = "Z";
       reg.anomaly = 1;
       reg.anomalyField = "Project";
       break;
+    }
   }
 
   return reg;
@@ -92,15 +105,16 @@ const introduceStrongAnomaly = (registration: TimeRegistration): TimeRegistratio
   const reg = { ...registration };
 
   switch (aspect) {
-    case "time":
+    case "time": {
       const timeShift = Math.random() < 0.5 ? -3 : 3;
       reg.startTime += timeShift;
       reg.endTime += timeShift;
-      reg.workDuration = Math.max(0, reg.endTime - reg.startTime - reg.breakDuration);
+      reg.workDuration = recalculateWorkDuration(reg.startTime, reg.endTime, reg.breakDuration);
       reg.anomaly = 2;
       reg.anomalyField = "Time Shift";
       break;
-    case "date":
+    }
+    case "date": {
       const date = new Date(reg.date);
       const isWeekend = date.getDay() === 0 || date.getDay() === 6;
       
@@ -116,7 +130,8 @@ const introduceStrongAnomaly = (registration: TimeRegistration): TimeRegistratio
         reg.anomalyField = "Date (Weekend)";
       }
       break;
-    case "numerical":
+    }
+    case "numerical": {
       if (reg.numericals.length > 0) {
         const numericalIndex = Math.floor(Math.random() * reg.numericals.length);
         const numerical = reg.numericals[numericalIndex];
@@ -125,6 +140,7 @@ const introduceStrongAnomaly = (registration: TimeRegistration): TimeRegistratio
         reg.anomalyField = `Numerical (${numerical.name})`;
       }
       break;
+    }
   }
 
   return reg;
