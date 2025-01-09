@@ -15,7 +15,6 @@ interface DatasetGenerationFormProps {
   onClear?: () => void;
 }
 
-// Get the Monday of the current week and format it as YYYY-MM-DD
 const getInitialStartDate = () => {
   const monday = startOfWeek(new Date(), { weekStartsOn: 1 });
   return format(monday, 'yyyy-MM-dd');
@@ -58,7 +57,7 @@ export const DatasetGenerationForm = ({ onGenerate, onClear }: DatasetGeneration
   const [anomalyType, setAnomalyType] = useState<"none" | "weak" | "strong" | "both">("none");
   const [anomalyProbability, setAnomalyProbability] = useState([0.33]);
 
-  // Clear patterns when onClear is called
+  // Handle clearing patterns when onClear is called
   React.useEffect(() => {
     if (onClear) {
       setEmployeePatterns([]);
@@ -107,7 +106,7 @@ export const DatasetGenerationForm = ({ onGenerate, onClear }: DatasetGeneration
         type: anomalyType,
         probability: anomalyProbability[0]
       },
-      existingPatterns: existingPatterns, // Use the existing patterns map
+      existingPatterns: existingPatterns,
       workPatternConfig: {
         numDepartments: numDepartments[0],
         numStartTimes: numStartTimes[0],
@@ -120,7 +119,7 @@ export const DatasetGenerationForm = ({ onGenerate, onClear }: DatasetGeneration
 
     // Update both the displayed patterns and the stored patterns
     setEmployeePatterns(patterns);
-    const newPatternsMap = new Map(existingPatterns); // Create a new map from existing patterns
+    const newPatternsMap = new Map(existingPatterns);
     patterns.forEach(pattern => {
       newPatternsMap.set(pattern.employeeId, pattern);
     });
