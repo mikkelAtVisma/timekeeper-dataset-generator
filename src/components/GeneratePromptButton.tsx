@@ -75,6 +75,7 @@ export const GeneratePromptButton = ({ onGenerateDataset, currentSettings }: Gen
         ...currentSettings,
         startDate,
         endDate,
+        numRegistrationsPerEmployee: currentSettings.numRegistrations[0],
         anomalyConfig: {
           type: "none",
           probability: 0
@@ -87,6 +88,7 @@ export const GeneratePromptButton = ({ onGenerateDataset, currentSettings }: Gen
         ...currentSettings,
         startDate: format(oneMonthLater, 'yyyy-MM-dd'),
         endDate: anomalyEndDate,
+        numRegistrationsPerEmployee: currentSettings.numRegistrations[0],
         anomalyConfig: {
           type: "both",
           probability: 0.33
