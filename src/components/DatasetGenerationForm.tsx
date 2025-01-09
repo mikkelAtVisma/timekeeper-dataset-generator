@@ -36,9 +36,8 @@ export const DatasetGenerationForm = ({ onGenerate, onClear }: DatasetGeneration
   const [departments] = useState(["HR", "IT", "Sales", "Marketing"]);
   const [numRegistrations, setNumRegistrations] = useState([35]);
   
-  // Pattern state management
+  // Pattern state management - single source of truth
   const [patternCache, setPatternCache] = useState<Map<string, EmployeeWorkPattern>>(new Map());
-  const [displayedPatterns, setDisplayedPatterns] = useState<EmployeeWorkPattern[]>([]);
   
   // Work Pattern settings
   const [numDepartments, setNumDepartments] = useState([1]);
@@ -63,7 +62,6 @@ export const DatasetGenerationForm = ({ onGenerate, onClear }: DatasetGeneration
   useEffect(() => {
     if (onClear) {
       setPatternCache(new Map());
-      setDisplayedPatterns([]);
     }
   }, [onClear]);
 
@@ -125,7 +123,6 @@ export const DatasetGenerationForm = ({ onGenerate, onClear }: DatasetGeneration
       newCache.set(pattern.employeeId, pattern);
     });
     setPatternCache(newCache);
-    setDisplayedPatterns(patterns);
     
     onGenerate(registrations);
     
@@ -134,6 +131,9 @@ export const DatasetGenerationForm = ({ onGenerate, onClear }: DatasetGeneration
       description: "Dataset generated successfully",
     });
   };
+
+  // Convert pattern cache to array for visualization
+  const patternsArray = Array.from(patternCache.values());
 
   return (
     <form onSubmit={handleSubmit} className="space-y-6 max-w-3xl mx-auto bg-white p-6 rounded-lg shadow-md">
@@ -199,9 +199,9 @@ export const DatasetGenerationForm = ({ onGenerate, onClear }: DatasetGeneration
 
       <Button type="submit" className="w-full">Generate Dataset</Button>
 
-      {displayedPatterns.length > 0 && (
+      {patternsArray.length > 0 && (
         <div className="mt-6">
-          <EmployeePatternVisualization patterns={displayedPatterns} />
+          <EmployeePatternVisualization patterns={patternsArray} />
         </div>
       )}
     </form>
