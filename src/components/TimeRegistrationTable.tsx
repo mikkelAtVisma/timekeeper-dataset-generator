@@ -10,6 +10,7 @@ import { TableFilters } from "./table/TableFilters";
 import { SortableTableHeader } from "./table/SortableTableHeader";
 import { TimeRegistrationTableBody } from "./table/TimeRegistrationTableBody";
 import { sortRegistrations } from "../utils/sortUtils";
+import { CopyRegistrationsButton } from "./table/CopyRegistrationsButton";
 
 interface TimeRegistrationTableProps {
   registrations: TimeRegistration[];
@@ -105,105 +106,110 @@ export const TimeRegistrationTable = ({
   }, [selectedRegistrationId]);
 
   return (
-    <div className="rounded-md border" ref={tableRef}>
-      <Table>
-        <TableHeader>
-          <TableRow>
-            <TableHead className="w-[50px]">Status</TableHead>
-            <SortableTableHeader field="date" currentSort={sort} onSort={handleSort} className="w-[100px]">
-              <div>Date</div>
-              <TableFilters
-                field="date"
-                options={uniqueValues.dates}
-                placeholder="Filter date..."
-                value={filters.date}
-                onValueChange={(value) => handleFilterChange('date', value)}
-              />
-            </SortableTableHeader>
-            <SortableTableHeader field="employeeId" currentSort={sort} onSort={handleSort} className="w-[120px]">
-              <div>Employee</div>
-              <TableFilters
-                field="employeeId"
-                options={uniqueValues.employeeIds}
-                placeholder="Filter employee..."
-                value={filters.employeeId}
-                onValueChange={(value) => handleFilterChange('employeeId', value)}
-              />
-            </SortableTableHeader>
-            <SortableTableHeader field="projectId" currentSort={sort} onSort={handleSort} className="w-[80px]">
-              <div>Project</div>
-              <TableFilters
-                field="projectId"
-                options={uniqueValues.projectIds}
-                placeholder="Filter project..."
-                value={filters.projectId}
-                onValueChange={(value) => handleFilterChange('projectId', value)}
-              />
-            </SortableTableHeader>
-            <SortableTableHeader field="departmentId" currentSort={sort} onSort={handleSort} className="w-[100px]">
-              <div>Department</div>
-              <TableFilters
-                field="departmentId"
-                options={uniqueValues.departmentIds}
-                placeholder="Filter department..."
-                value={filters.departmentId}
-                onValueChange={(value) => handleFilterChange('departmentId', value)}
-              />
-            </SortableTableHeader>
-            <SortableTableHeader field="workCategory" currentSort={sort} onSort={handleSort} className="w-[120px]">
-              <div>Category</div>
-              <TableFilters
-                field="workCategory"
-                options={uniqueValues.workCategories}
-                placeholder="Filter category..."
-                value={filters.workCategory}
-                onValueChange={(value) => handleFilterChange('workCategory', value)}
-              />
-            </SortableTableHeader>
-            <SortableTableHeader field="startTime" currentSort={sort} onSort={handleSort} className="w-[80px]">
-              <div>Start Time</div>
-            </SortableTableHeader>
-            <SortableTableHeader field="endTime" currentSort={sort} onSort={handleSort} className="w-[80px]">
-              <div>End Time</div>
-            </SortableTableHeader>
-            <SortableTableHeader field="workDuration" currentSort={sort} onSort={handleSort} className="w-[90px]">
-              <div>Duration</div>
-              <TableFilters
-                field="workDuration"
-                options={uniqueValues.workDurations}
-                placeholder="Filter duration..."
-                value={filters.workDuration}
-                onValueChange={(value) => handleFilterChange('workDuration', value)}
-              />
-            </SortableTableHeader>
-            <SortableTableHeader field="breakDuration" currentSort={sort} onSort={handleSort} className="w-[80px]">
-              <div>Break</div>
-              <TableFilters
-                field="breakDuration"
-                options={uniqueValues.breakDurations}
-                placeholder="Filter break..."
-                value={filters.breakDuration}
-                onValueChange={(value) => handleFilterChange('breakDuration', value)}
-              />
-            </SortableTableHeader>
-            <SortableTableHeader field="publicHoliday" currentSort={sort} onSort={handleSort} className="w-[80px]">
-              <div>Holiday</div>
-              <TableFilters
-                field="publicHoliday"
-                options={["yes", "no"]}
-                placeholder="Filter holiday..."
-                value={filters.publicHoliday}
-                onValueChange={(value) => handleFilterChange('publicHoliday', value)}
-              />
-            </SortableTableHeader>
-          </TableRow>
-        </TableHeader>
-        <TimeRegistrationTableBody 
-          registrations={filteredAndSortedRegistrations}
-          selectedRegistrationId={selectedRegistrationId}
-          onRegistrationClick={onRegistrationClick}
-        />
-      </Table>
+    <div className="space-y-4">
+      <div className="flex justify-end">
+        <CopyRegistrationsButton registrations={filteredAndSortedRegistrations} />
+      </div>
+      <div className="rounded-md border" ref={tableRef}>
+        <Table>
+          <TableHeader>
+            <TableRow>
+              <TableHead className="w-[50px]">Status</TableHead>
+              <SortableTableHeader field="date" currentSort={sort} onSort={handleSort} className="w-[100px]">
+                <div>Date</div>
+                <TableFilters
+                  field="date"
+                  options={uniqueValues.dates}
+                  placeholder="Filter date..."
+                  value={filters.date}
+                  onValueChange={(value) => handleFilterChange('date', value)}
+                />
+              </SortableTableHeader>
+              <SortableTableHeader field="employeeId" currentSort={sort} onSort={handleSort} className="w-[120px]">
+                <div>Employee</div>
+                <TableFilters
+                  field="employeeId"
+                  options={uniqueValues.employeeIds}
+                  placeholder="Filter employee..."
+                  value={filters.employeeId}
+                  onValueChange={(value) => handleFilterChange('employeeId', value)}
+                />
+              </SortableTableHeader>
+              <SortableTableHeader field="projectId" currentSort={sort} onSort={handleSort} className="w-[80px]">
+                <div>Project</div>
+                <TableFilters
+                  field="projectId"
+                  options={uniqueValues.projectIds}
+                  placeholder="Filter project..."
+                  value={filters.projectId}
+                  onValueChange={(value) => handleFilterChange('projectId', value)}
+                />
+              </SortableTableHeader>
+              <SortableTableHeader field="departmentId" currentSort={sort} onSort={handleSort} className="w-[100px]">
+                <div>Department</div>
+                <TableFilters
+                  field="departmentId"
+                  options={uniqueValues.departmentIds}
+                  placeholder="Filter department..."
+                  value={filters.departmentId}
+                  onValueChange={(value) => handleFilterChange('departmentId', value)}
+                />
+              </SortableTableHeader>
+              <SortableTableHeader field="workCategory" currentSort={sort} onSort={handleSort} className="w-[120px]">
+                <div>Category</div>
+                <TableFilters
+                  field="workCategory"
+                  options={uniqueValues.workCategories}
+                  placeholder="Filter category..."
+                  value={filters.workCategory}
+                  onValueChange={(value) => handleFilterChange('workCategory', value)}
+                />
+              </SortableTableHeader>
+              <SortableTableHeader field="startTime" currentSort={sort} onSort={handleSort} className="w-[80px]">
+                <div>Start Time</div>
+              </SortableTableHeader>
+              <SortableTableHeader field="endTime" currentSort={sort} onSort={handleSort} className="w-[80px]">
+                <div>End Time</div>
+              </SortableTableHeader>
+              <SortableTableHeader field="workDuration" currentSort={sort} onSort={handleSort} className="w-[90px]">
+                <div>Duration</div>
+                <TableFilters
+                  field="workDuration"
+                  options={uniqueValues.workDurations}
+                  placeholder="Filter duration..."
+                  value={filters.workDuration}
+                  onValueChange={(value) => handleFilterChange('workDuration', value)}
+                />
+              </SortableTableHeader>
+              <SortableTableHeader field="breakDuration" currentSort={sort} onSort={handleSort} className="w-[80px]">
+                <div>Break</div>
+                <TableFilters
+                  field="breakDuration"
+                  options={uniqueValues.breakDurations}
+                  placeholder="Filter break..."
+                  value={filters.breakDuration}
+                  onValueChange={(value) => handleFilterChange('breakDuration', value)}
+                />
+              </SortableTableHeader>
+              <SortableTableHeader field="publicHoliday" currentSort={sort} onSort={handleSort} className="w-[80px]">
+                <div>Holiday</div>
+                <TableFilters
+                  field="publicHoliday"
+                  options={["yes", "no"]}
+                  placeholder="Filter holiday..."
+                  value={filters.publicHoliday}
+                  onValueChange={(value) => handleFilterChange('publicHoliday', value)}
+                />
+              </SortableTableHeader>
+            </TableRow>
+          </TableHeader>
+          <TimeRegistrationTableBody 
+            registrations={filteredAndSortedRegistrations}
+            selectedRegistrationId={selectedRegistrationId}
+            onRegistrationClick={onRegistrationClick}
+          />
+        </Table>
+      </div>
     </div>
   );
 };
