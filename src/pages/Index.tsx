@@ -14,9 +14,13 @@ const Index = () => {
   const [selectedRegistrationId, setSelectedRegistrationId] = useState<string | null>(null);
   const [activeTab, setActiveTab] = useState("list");
   const [clearTrigger, setClearTrigger] = useState(0);
+  const [currentStartDate, setCurrentStartDate] = useState("");
+  const [currentEndDate, setCurrentEndDate] = useState("");
 
-  const handleGenerateDataset = (newRegistrations: TimeRegistration[]) => {
+  const handleGenerateDataset = (newRegistrations: TimeRegistration[], startDate: string, endDate: string) => {
     setRegistrations((prev) => [...newRegistrations, ...prev]);
+    setCurrentStartDate(startDate);
+    setCurrentEndDate(endDate);
   };
 
   const handleRegistrationClick = (registration: TimeRegistration, targetView: "list" | "calendar") => {
@@ -28,6 +32,8 @@ const Index = () => {
     setRegistrations([]);
     setSelectedRegistrationId(null);
     setClearTrigger(prev => prev + 1);
+    setCurrentStartDate("");
+    setCurrentEndDate("");
     toast({
       title: "Dataset cleared",
       description: "All registrations and patterns have been removed",
@@ -71,6 +77,8 @@ const Index = () => {
                 registrations={registrations} 
                 selectedRegistrationId={selectedRegistrationId}
                 onRegistrationClick={(registration) => handleRegistrationClick(registration, "calendar")}
+                startDate={currentStartDate}
+                endDate={currentEndDate}
               />
             </TabsContent>
             <TabsContent value="calendar">

@@ -11,7 +11,7 @@ import { generateDataset } from "../utils/datasetGenerator";
 import { EmployeePatternVisualization } from "./EmployeePatternVisualization";
 
 interface DatasetGenerationFormProps {
-  onGenerate: (registrations: TimeRegistration[]) => void;
+  onGenerate: (registrations: TimeRegistration[], startDate: string, endDate: string) => void;
   onClear?: () => void;
 }
 
@@ -124,7 +124,7 @@ export const DatasetGenerationForm = ({ onGenerate, onClear }: DatasetGeneration
     });
     setPatternCache(newCache);
     
-    onGenerate(registrations);
+    onGenerate(registrations, startDate, endDate);
     
     toast({
       title: "Success",

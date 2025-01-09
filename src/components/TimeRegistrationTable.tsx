@@ -16,12 +16,16 @@ interface TimeRegistrationTableProps {
   registrations: TimeRegistration[];
   selectedRegistrationId?: string | null;
   onRegistrationClick?: (registration: TimeRegistration) => void;
+  startDate?: string;
+  endDate?: string;
 }
 
 export const TimeRegistrationTable = ({ 
   registrations,
   selectedRegistrationId,
-  onRegistrationClick
+  onRegistrationClick,
+  startDate,
+  endDate
 }: TimeRegistrationTableProps) => {
   const [filters, setFilters] = useState({
     date: "all",
@@ -108,7 +112,11 @@ export const TimeRegistrationTable = ({
   return (
     <div className="space-y-4">
       <div className="flex justify-end">
-        <CopyRegistrationsButton registrations={filteredAndSortedRegistrations} />
+        <CopyRegistrationsButton 
+          registrations={filteredAndSortedRegistrations} 
+          defaultStartDate={startDate}
+          defaultEndDate={endDate}
+        />
       </div>
       <div className="rounded-md border" ref={tableRef}>
         <Table>

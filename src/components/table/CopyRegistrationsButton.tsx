@@ -15,12 +15,18 @@ import { useToast } from "@/components/ui/use-toast";
 
 interface CopyRegistrationsButtonProps {
   registrations: TimeRegistration[];
+  defaultStartDate?: string;
+  defaultEndDate?: string;
 }
 
-export const CopyRegistrationsButton = ({ registrations }: CopyRegistrationsButtonProps) => {
+export const CopyRegistrationsButton = ({ 
+  registrations,
+  defaultStartDate = "",
+  defaultEndDate = ""
+}: CopyRegistrationsButtonProps) => {
   const { toast } = useToast();
-  const [startDate, setStartDate] = useState("");
-  const [endDate, setEndDate] = useState("");
+  const [startDate, setStartDate] = useState(defaultStartDate);
+  const [endDate, setEndDate] = useState(defaultEndDate);
 
   const formatTime = (time: number) => {
     const hours = Math.floor(time);
