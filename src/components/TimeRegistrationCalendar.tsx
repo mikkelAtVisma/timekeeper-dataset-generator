@@ -4,11 +4,14 @@ import { ScrollArea } from "@/components/ui/scroll-area";
 import { TimeRegistration } from "../types/timeRegistration";
 import { 
   format, 
-  startOfWeek, 
-  endOfWeek, 
+  startOfWeek,
+  endOfWeek,
   eachDayOfInterval,
   isSameMonth,
   addWeeks,
+  startOfMonth,
+  endOfMonth,
+  differenceInWeeks,
 } from "date-fns";
 import { CalendarHeader } from "./calendar/CalendarHeader";
 import { RegistrationCell } from "./calendar/RegistrationCell";
@@ -36,9 +39,20 @@ export const TimeRegistrationCalendar = ({
   }, [registrations]);
 
   const dateRanges = useMemo(() => {
-    const weeksToShow = 4;
+    // Get the start and end of the current month
+    const monthStart = startOfMonth(selectedDate);
+    const monthEnd = endOfMonth(selectedDate);
+
+    // Get the start of the week containing the first day of the month
+    const firstWeekStart = startOfWeek(monthStart, { weekStartsOn: 1 });
+    // Get the end of the week containing the last day of the month
+    const lastWeekEnd = endOfWeek(monthEnd, { weekStartsOn: 1 });
+
+    // Calculate the number of weeks needed to display the full month
+    const weeksToShow = differenceInWeeks(lastWeekEnd, firstWeekStart) + 1;
+
     return Array.from({ length: weeksToShow }, (_, weekIndex) => {
-      const weekStart = startOfWeek(addWeeks(selectedDate, weekIndex), { weekStartsOn: 1 });
+      const weekStart = addWeeks(firstWeekStart, weekIndex);
       return eachDayOfInterval({
         start: weekStart,
         end: endOfWeek(weekStart, { weekStartsOn: 1 })
@@ -55,7 +69,8 @@ export const TimeRegistrationCalendar = ({
 
   const navigateDate = (direction: 'prev' | 'next') => {
     const newDate = new Date(selectedDate);
-    newDate.setDate(newDate.getDate() + (direction === 'next' ? 28 : -28));
+    // Navigate by months instead of weeks
+    newDate.setMonth(newDate.getMonth() + (direction === 'next' ? 1 : -1));
     setSelectedDate(newDate);
   };
 
