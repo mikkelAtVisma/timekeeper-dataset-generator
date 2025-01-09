@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { useToast } from "@/components/ui/use-toast";
 import { TimeRegistration, EmployeeWorkPattern } from "../types/timeRegistration";
@@ -38,7 +38,7 @@ export const DatasetGenerationForm = ({ onGenerate, onClear }: DatasetGeneration
   const [employeePatterns, setEmployeePatterns] = useState<EmployeeWorkPattern[]>([]);
   const [existingPatterns, setExistingPatterns] = useState<Map<string, EmployeeWorkPattern>>(new Map());
   
-  // Work Pattern settings - Updated all initial values to [1]
+  // Work Pattern settings
   const [numDepartments, setNumDepartments] = useState([1]);
   const [numStartTimes, setNumStartTimes] = useState([1]);
   const [numEndTimes, setNumEndTimes] = useState([1]);
@@ -58,10 +58,14 @@ export const DatasetGenerationForm = ({ onGenerate, onClear }: DatasetGeneration
   const [anomalyProbability, setAnomalyProbability] = useState([0.33]);
 
   // Handle clearing patterns when onClear is called
-  React.useEffect(() => {
-    if (onClear) {
+  useEffect(() => {
+    const handleClear = () => {
       setEmployeePatterns([]);
       setExistingPatterns(new Map());
+    };
+
+    if (onClear) {
+      handleClear();
     }
   }, [onClear]);
 
