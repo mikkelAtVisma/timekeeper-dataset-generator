@@ -107,7 +107,7 @@ export const DatasetGenerationForm = ({ onGenerate, onClear }: DatasetGeneration
         type: anomalyType,
         probability: anomalyProbability[0]
       },
-      existingPatterns: new Map(), // Reset existing patterns on each generation
+      existingPatterns: existingPatterns, // Use the existing patterns map
       workPatternConfig: {
         numDepartments: numDepartments[0],
         numStartTimes: numStartTimes[0],
@@ -120,7 +120,7 @@ export const DatasetGenerationForm = ({ onGenerate, onClear }: DatasetGeneration
 
     // Update both the displayed patterns and the stored patterns
     setEmployeePatterns(patterns);
-    const newPatternsMap = new Map();
+    const newPatternsMap = new Map(existingPatterns); // Create a new map from existing patterns
     patterns.forEach(pattern => {
       newPatternsMap.set(pattern.employeeId, pattern);
     });
