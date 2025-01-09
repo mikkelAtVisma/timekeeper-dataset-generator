@@ -35,8 +35,8 @@ export const CopyRegistrationsButton = ({ registrations }: CopyRegistrationsButt
           reg.projectId,
           reg.departmentId,
           reg.workCategory,
-          format(new Date(reg.startTime), "HH:mm"),
-          format(new Date(reg.endTime), "HH:mm"),
+          reg.startTime,
+          reg.endTime,
           formattedDuration,
           formattedBreak,
           reg.publicHoliday ? "Yes" : "No"
