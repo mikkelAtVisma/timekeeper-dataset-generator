@@ -35,8 +35,10 @@ export const DatasetGenerationForm = ({ onGenerate, onClear }: DatasetGeneration
   const [workCategories] = useState(["Development", "Testing", "Meetings", "Documentation"]);
   const [departments] = useState(["HR", "IT", "Sales", "Marketing"]);
   const [numRegistrations, setNumRegistrations] = useState([35]);
-  const [employeePatterns, setEmployeePatterns] = useState<EmployeeWorkPattern[]>([]);
-  const [existingPatterns, setExistingPatterns] = useState<Map<string, EmployeeWorkPattern>>(new Map());
+  
+  // Pattern state management
+  const [patternCache, setPatternCache] = useState<Map<string, EmployeeWorkPattern>>(new Map());
+  const [displayedPatterns, setDisplayedPatterns] = useState<EmployeeWorkPattern[]>([]);
   
   // Work Pattern settings
   const [numDepartments, setNumDepartments] = useState([1]);
@@ -57,15 +59,11 @@ export const DatasetGenerationForm = ({ onGenerate, onClear }: DatasetGeneration
   const [anomalyType, setAnomalyType] = useState<"none" | "weak" | "strong" | "both">("none");
   const [anomalyProbability, setAnomalyProbability] = useState([0.33]);
 
-  // Handle clearing patterns when onClear is called
+  // Clear pattern cache when clear is triggered
   useEffect(() => {
-    const handleClear = () => {
-      setEmployeePatterns([]);
-      setExistingPatterns(new Map());
-    };
-
     if (onClear) {
-      handleClear();
+      setPatternCache(new Map());
+      setDisplayedPatterns([]);
     }
   }, [onClear]);
 
@@ -92,7 +90,7 @@ export const DatasetGenerationForm = ({ onGenerate, onClear }: DatasetGeneration
       return;
     }
 
-    // Generate data using the parameters and pass existing patterns
+    // Generate data using the parameters and cached patterns
     const { registrations, patterns } = generateDataset({
       numEmployees,
       startDate,
@@ -110,7 +108,7 @@ export const DatasetGenerationForm = ({ onGenerate, onClear }: DatasetGeneration
         type: anomalyType,
         probability: anomalyProbability[0]
       },
-      existingPatterns: existingPatterns,
+      existingPatterns: patternCache,
       workPatternConfig: {
         numDepartments: numDepartments[0],
         numStartTimes: numStartTimes[0],
@@ -121,13 +119,13 @@ export const DatasetGenerationForm = ({ onGenerate, onClear }: DatasetGeneration
       }
     });
 
-    // Update both the displayed patterns and the stored patterns
-    setEmployeePatterns(patterns);
-    const newPatternsMap = new Map(existingPatterns);
+    // Update pattern cache with new patterns
+    const newCache = new Map(patternCache);
     patterns.forEach(pattern => {
-      newPatternsMap.set(pattern.employeeId, pattern);
+      newCache.set(pattern.employeeId, pattern);
     });
-    setExistingPatterns(newPatternsMap);
+    setPatternCache(newCache);
+    setDisplayedPatterns(patterns);
     
     onGenerate(registrations);
     
@@ -201,9 +199,9 @@ export const DatasetGenerationForm = ({ onGenerate, onClear }: DatasetGeneration
 
       <Button type="submit" className="w-full">Generate Dataset</Button>
 
-      {employeePatterns.length > 0 && (
+      {displayedPatterns.length > 0 && (
         <div className="mt-6">
-          <EmployeePatternVisualization patterns={employeePatterns} />
+          <EmployeePatternVisualization patterns={displayedPatterns} />
         </div>
       )}
     </form>
