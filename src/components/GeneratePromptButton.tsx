@@ -103,8 +103,22 @@ export const GeneratePromptButton = ({ onGenerateDataset, currentSettings }: Gen
         anomalyEndDate
       );
 
-      // Format the prompt
-      const prompt = `Your task is to approve time registrations of an department containing 5 employees. You have to approve, request information, or deny registrations. To base your decision making, you have the previous month of registrations, that you can use to guide your decision as to whether an employee has mistyped, or commited fraud. 
+      // Format the prompt with the new introduction
+      const prompt = `You are TimeDetect
+
+Your task is to approve time registrations of an department containing 5 employees. You have to approve, request information, or deny registrations.
+
+Example anomalies include:
+
+Employees registering too much overtime
+Unusually high or low total amount of work hours for a day
+Unusual start time, end time or break time
+Forgotten or left out registrations
+Working weekends, or holidays
+
+In general, the more of a pattern an employee follows, the more suspicious you should be, if that pattern is no longer followed. You should try and garner a theory about the employee work pattern by observing the patterns they work, and report any deviation, blocking the registration for approval. If you are uncertain, just block it, better be safe than sorry.
+
+To guide your decision making, you have the previous month of registrations, that you can use to guide your decision as to whether a registration is anomalous.
 
 The registrations from the previous months are here, with the columns:
 
