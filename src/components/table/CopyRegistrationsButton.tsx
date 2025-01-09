@@ -10,7 +10,7 @@ import {
 } from "@/components/ui/dialog";
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useToast } from "@/components/ui/use-toast";
 
 interface CopyRegistrationsButtonProps {
@@ -27,6 +27,12 @@ export const CopyRegistrationsButton = ({
   const { toast } = useToast();
   const [startDate, setStartDate] = useState(defaultStartDate);
   const [endDate, setEndDate] = useState(defaultEndDate);
+
+  // Update state when props change
+  useEffect(() => {
+    setStartDate(defaultStartDate);
+    setEndDate(defaultEndDate);
+  }, [defaultStartDate, defaultEndDate]);
 
   const formatTime = (time: number) => {
     const hours = Math.floor(time);
