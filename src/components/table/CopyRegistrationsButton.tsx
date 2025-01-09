@@ -1,7 +1,6 @@
 import { Button } from "@/components/ui/button";
 import { TimeRegistration } from "@/types/timeRegistration";
 import { Copy } from "lucide-react";
-import { format } from "date-fns";
 import {
   Dialog,
   DialogContent,
@@ -23,6 +22,12 @@ export const CopyRegistrationsButton = ({ registrations }: CopyRegistrationsButt
   const [startDate, setStartDate] = useState("");
   const [endDate, setEndDate] = useState("");
 
+  const formatTime = (time: number) => {
+    const hours = Math.floor(time);
+    const minutes = Math.round((time - hours) * 60);
+    return `${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}`;
+  };
+
   const formatRegistrationsForCopy = (filteredRegistrations: TimeRegistration[]) => {
     return filteredRegistrations
       .map((reg) => {
@@ -35,8 +40,8 @@ export const CopyRegistrationsButton = ({ registrations }: CopyRegistrationsButt
           reg.projectId,
           reg.departmentId,
           reg.workCategory,
-          reg.startTime,
-          reg.endTime,
+          formatTime(reg.startTime),
+          formatTime(reg.endTime),
           formattedDuration,
           formattedBreak,
           reg.publicHoliday ? "Yes" : "No"
