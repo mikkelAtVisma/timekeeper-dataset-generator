@@ -71,21 +71,25 @@ serve(async (req) => {
       }))
     }
 
-    const response = await fetch(job.presigned_url, {
-      method: 'PUT',
-      headers: {
-        //Empty headers to avoid any default headers
-      },
-      body: JSON.stringify(formattedDataset),
-    })
+    const body = new Blob([JSON.stringify(formattedDataset)], { type: '' });
 
-    // Log response details
+    // Create a new Request object
+    const request = new Request(job.presigned_url, {
+      method: 'PUT',
+      body,
+    });
+
+    // Force-delete the default Content-Type header
+    request.headers.delete('Content-Type');
+
+    // Now perform the fetch
+    const response = await fetch(request);
+
+    // Check if it went OK
     if (!response.ok) {
-      const errorText = await response.text()
-      console.log('Response Status:', response.status)
-      console.log('Response Headers:', Object.fromEntries(response.headers))
-      console.log('Response Error:', errorText)
-      throw new Error(`Failed to upload to presigned URL: ${response.statusText}. Status: ${response.status}. Error: ${errorText}`)
+      const errorText = await response.text();
+      console.error('Failed to upload:', response.status, response.statusText, errorText);
+      throw new Error(`Upload failed: ${response.statusText}`);
     }
 
     // 5. Update the job status and dataset_id
