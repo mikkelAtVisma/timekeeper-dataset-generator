@@ -34,11 +34,8 @@ export class TimeDetectService {
   }
 
   async getPresignedUrl(): Promise<{ url: string; jobId: string; message: string }> {
-    const { data, error } = await supabase.functions.invoke('timedetect', {
+    const { data, error } = await supabase.functions.invoke('timedetect/presigned_url', {
       method: 'GET',
-      functionOptions: {
-        path: 'presigned_url'
-      }
     });
 
     if (error) {
