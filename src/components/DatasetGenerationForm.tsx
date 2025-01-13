@@ -9,11 +9,8 @@ import { AnomalySettingsSection } from "./dataset-generation/AnomalySettingsSect
 import { WorkPatternSettingsSection } from "./dataset-generation/WorkPatternSettingsSection";
 import { generateDataset } from "../utils/datasetGenerator";
 import { EmployeePatternVisualization } from "./EmployeePatternVisualization";
-
-interface DatasetGenerationFormProps {
-  onGenerate: (registrations: TimeRegistration[], startDate: string, endDate: string) => void;
-  onClear?: () => void;
-}
+import { useQueryClient } from "@tanstack/react-query";
+import { INITIAL_DATASET_STATE } from "@/stores/datasetStore";
 
 const getInitialStartDate = () => {
   const monday = startOfWeek(new Date(), { weekStartsOn: 1 });
@@ -26,7 +23,13 @@ const getInitialEndDate = () => {
   return format(monthLater, 'yyyy-MM-dd');
 };
 
+interface DatasetGenerationFormProps {
+  onGenerate: (registrations: TimeRegistration[], startDate: string, endDate: string) => void;
+  onClear?: () => void;
+}
+
 export const DatasetGenerationForm = ({ onGenerate, onClear }: DatasetGenerationFormProps) => {
+  const queryClient = useQueryClient();
   const { toast } = useToast();
   const [numEmployees, setNumEmployees] = useState(5);
   const [startDate, setStartDate] = useState(getInitialStartDate());
@@ -123,6 +126,13 @@ export const DatasetGenerationForm = ({ onGenerate, onClear }: DatasetGeneration
       newCache.set(pattern.employeeId, pattern);
     });
     setPatternCache(newCache);
+    
+    // Update global dataset state
+    queryClient.setQueryData(['dataset'], {
+      registrations,
+      startDate,
+      endDate,
+    });
     
     onGenerate(registrations, startDate, endDate);
     

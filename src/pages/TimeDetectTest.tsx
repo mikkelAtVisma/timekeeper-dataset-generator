@@ -4,10 +4,17 @@ import { timeDetectService } from "@/services/timeDetectService";
 import { useToast } from "@/components/ui/use-toast";
 import { ArrowLeft } from "lucide-react";
 import { Link } from "react-router-dom";
+import { useQuery } from "@tanstack/react-query";
+import { DatasetState, INITIAL_DATASET_STATE } from "@/stores/datasetStore";
 
 const TimeDetectTest = () => {
   const { toast } = useToast();
   const [isLoading, setIsLoading] = useState(false);
+
+  const { data: dataset = INITIAL_DATASET_STATE } = useQuery<DatasetState>({
+    queryKey: ['dataset'],
+    initialData: INITIAL_DATASET_STATE,
+  });
 
   const handleTestConnection = async () => {
     setIsLoading(true);
@@ -42,6 +49,11 @@ const TimeDetectTest = () => {
         </div>
         
         <div className="bg-white p-6 rounded-lg shadow-sm space-y-6">
+          {dataset.registrations.length > 0 && (
+            <div className="text-gray-600 mb-4">
+              Dataset with {dataset.registrations.length} registrations
+            </div>
+          )}
           <p className="text-gray-600">
             Test the connection to the TimeDetect service by clicking the button below.
           </p>
