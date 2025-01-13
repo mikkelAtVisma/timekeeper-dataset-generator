@@ -2,6 +2,7 @@ import { supabase } from '../integrations/supabase/client';
 
 export class TimeDetectService {
   private static instance: TimeDetectService;
+  private readonly TIMEOUT = 10000; // 10 seconds timeout
 
   private constructor() {}
 
@@ -15,17 +16,22 @@ export class TimeDetectService {
   async testConnection(): Promise<boolean> {
     try {
       console.log('Testing TimeDetect connection...');
-      const { data, error } = await supabase.functions.invoke('timedetect-health', {
-        method: 'GET',
-      });
-
-      console.log('TimeDetect response:', { data, error });
+      
+      const { data, error } = await Promise.race([
+        supabase.functions.invoke('timedetect-health', {
+          method: 'GET',
+        }),
+        new Promise((_, reject) => 
+          setTimeout(() => reject(new Error('Connection timeout')), this.TIMEOUT)
+        )
+      ]) as any;
 
       if (error) {
         console.error('Error testing TimeDetect connection:', error);
         return false;
       }
 
+      console.log('TimeDetect response:', data);
       return data?.status === 'ok' && !!data;
     } catch (error) {
       console.error('Error testing TimeDetect connection:', error);
@@ -34,16 +40,27 @@ export class TimeDetectService {
   }
 
   async getPresignedUrl(): Promise<{ url: string; jobId: string; message: string }> {
-    const { data, error } = await supabase.functions.invoke('timedetect-presigned', {
-      method: 'GET',
-    });
+    try {
+      const { data, error } = await Promise.race([
+        supabase.functions.invoke('timedetect-presigned', {
+          method: 'GET',
+        }),
+        new Promise((_, reject) => 
+          setTimeout(() => reject(new Error('Connection timeout')), this.TIMEOUT)
+        )
+      ]) as any;
 
-    if (error) {
+      if (error) {
+        console.error('Error getting presigned URL:', error);
+        throw error;
+      }
+
+      console.log('Presigned URL response:', data);
+      return data;
+    } catch (error) {
       console.error('Error getting presigned URL:', error);
       throw error;
     }
-
-    return data;
   }
 }
 
