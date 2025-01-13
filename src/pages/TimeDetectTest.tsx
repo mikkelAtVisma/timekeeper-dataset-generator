@@ -2,7 +2,7 @@ import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { timeDetectService } from "@/services/timeDetectService";
 import { useToast } from "@/components/ui/use-toast";
-import { ArrowLeft } from "lucide-react";
+import { ArrowLeft, RefreshCw } from "lucide-react";
 import { Link } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
 import { DatasetState, INITIAL_DATASET_STATE } from "@/stores/datasetStore";
@@ -73,6 +73,22 @@ const TimeDetectTest = () => {
     }
   };
 
+  const handleRefreshJobs = async () => {
+    try {
+      await refetchJobs();
+      toast({
+        title: "Jobs Refreshed",
+        description: "TimeDetect jobs list has been updated",
+      });
+    } catch (error) {
+      toast({
+        title: "Error",
+        description: "Failed to refresh jobs",
+        variant: "destructive",
+      });
+    }
+  };
+
   const formatDate = (dateString: string) => {
     return new Date(dateString).toLocaleString();
   };
@@ -122,7 +138,18 @@ const TimeDetectTest = () => {
             </div>
 
             <div className="border-t pt-4">
-              <h2 className="text-lg font-semibold mb-4">TimeDetect Jobs</h2>
+              <div className="flex justify-between items-center mb-4">
+                <h2 className="text-lg font-semibold">TimeDetect Jobs</h2>
+                <Button
+                  onClick={handleRefreshJobs}
+                  variant="outline"
+                  size="sm"
+                  className="gap-2"
+                >
+                  <RefreshCw className="h-4 w-4" />
+                  Refresh Jobs
+                </Button>
+              </div>
               <ScrollArea className="h-[400px] rounded-md border">
                 <Table>
                   <TableHeader>
