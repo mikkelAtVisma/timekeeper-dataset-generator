@@ -10,7 +10,7 @@ import { WorkPatternSettingsSection } from "./dataset-generation/WorkPatternSett
 import { generateDataset } from "../utils/datasetGenerator";
 import { EmployeePatternVisualization } from "./EmployeePatternVisualization";
 import { useQueryClient } from "@tanstack/react-query";
-import { INITIAL_DATASET_STATE } from "@/stores/datasetStore";
+import { INITIAL_DATASET_STATE, persistDataset } from "@/stores/datasetStore";
 
 const getInitialStartDate = () => {
   const monday = startOfWeek(new Date(), { weekStartsOn: 1 });
@@ -127,12 +127,17 @@ export const DatasetGenerationForm = ({ onGenerate, onClear }: DatasetGeneration
     });
     setPatternCache(newCache);
     
-    // Update global dataset state
-    queryClient.setQueryData(['dataset'], {
+    const newDataset = {
       registrations,
       startDate,
       endDate,
-    });
+    };
+    
+    // Update global dataset state
+    queryClient.setQueryData(['dataset'], newDataset);
+    
+    // Persist the dataset
+    persistDataset(newDataset);
     
     onGenerate(registrations, startDate, endDate);
     
