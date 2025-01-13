@@ -2,7 +2,7 @@ import { timeDetectAuth } from '../utils/timeDetectAuth';
 
 export class TimeDetectService {
   private static instance: TimeDetectService;
-  private baseUrl = 'https://api.stage.visma.io/timedetect/v1';
+  private baseUrl = 'https://api.machine-learning-factory.stage.visma.com/td';
 
   private constructor() {}
 
@@ -16,7 +16,7 @@ export class TimeDetectService {
   async testConnection(): Promise<boolean> {
     try {
       const headers = await timeDetectAuth.getAuthHeaders();
-      const response = await fetch(`${this.baseUrl}/health`, {
+      const response = await fetch(`${this.baseUrl}/health_check`, {
         headers
       });
       return response.ok;
