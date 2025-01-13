@@ -15,7 +15,7 @@ export class TimeDetectService {
   async testConnection(): Promise<boolean> {
     try {
       console.log('Testing TimeDetect connection...');
-      const { data, error } = await supabase.functions.invoke('timedetect', {
+      const { data, error } = await supabase.functions.invoke('timedetect-health', {
         method: 'GET',
       });
 
@@ -34,7 +34,7 @@ export class TimeDetectService {
   }
 
   async getPresignedUrl(): Promise<{ url: string; jobId: string; message: string }> {
-    const { data, error } = await supabase.functions.invoke('timedetect/presigned_url', {
+    const { data, error } = await supabase.functions.invoke('timedetect-presigned', {
       method: 'GET',
     });
 
