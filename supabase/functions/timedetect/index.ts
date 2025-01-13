@@ -17,11 +17,24 @@ serve(async (req) => {
     const url = new URL(req.url)
     const path = url.pathname.split('/')[1]
 
+    // Log request details
+    console.log('Request Details:', {
+      method: req.method,
+      path: url.pathname,
+      headers: Object.fromEntries(req.headers.entries()),
+      timestamp: new Date().toISOString()
+    })
+
     if (path === 'presigned_url') {
       console.log('Requesting presigned URL from TimeDetect API...')
       
       const baseUrl = 'https://api.machine-learning-factory.stage.visma.com/td'
       const headers = await timeDetectAuth.getAuthHeaders()
+
+      console.log('Making request to TimeDetect API with headers:', {
+        ...headers,
+        tenantId: 'time.reg.benchmark'
+      })
 
       const response = await fetch(`${baseUrl}/presigned_url`, {
         headers: {
@@ -34,6 +47,7 @@ serve(async (req) => {
       console.log('TimeDetect API Response:', data)
 
       if (!response.ok) {
+        console.error('Failed to get presigned URL:', data)
         throw new Error(`Failed to get presigned URL: ${data.message || response.statusText}`)
       }
 
@@ -43,20 +57,24 @@ serve(async (req) => {
         Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? ''
       )
 
+      console.log('Storing job information in database...')
+      
       // Store the job information
       const { error: dbError } = await supabase
         .from('timedetect_jobs')
         .insert({
           job_id: data.jobId,
           presigned_url: data.url,
-          dataset_id: crypto.randomUUID(), // Generate a unique dataset ID
-          customer_id: crypto.randomUUID(), // Generate a unique customer ID
+          dataset_id: crypto.randomUUID(),
+          customer_id: crypto.randomUUID(),
         })
 
       if (dbError) {
         console.error('Error storing job information:', dbError)
         throw new Error('Failed to store job information')
       }
+
+      console.log('Successfully stored job information')
 
       return new Response(
         JSON.stringify(data),
@@ -68,7 +86,7 @@ serve(async (req) => {
     const baseUrl = 'https://api.machine-learning-factory.stage.visma.com/td'
     const headers = await timeDetectAuth.getAuthHeaders()
 
-    console.log('Making request to TimeDetect API...')
+    console.log('Making health check request to TimeDetect API...')
     
     // Forward the request to TimeDetect API
     const response = await fetch(`${baseUrl}/health_check`, {
@@ -79,7 +97,7 @@ serve(async (req) => {
     })
 
     const data = await response.json()
-    console.log('TimeDetect API Response:', { status: response.status, data })
+    console.log('Health check response:', data)
 
     // If the response was successful, return the data with our expected format
     if (response.ok) {
