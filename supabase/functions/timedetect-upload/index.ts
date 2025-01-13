@@ -57,7 +57,6 @@ serve(async (req) => {
       headers: {
         ...authHeaders,
         'Content-Type': 'application/json',
-        'x-amz-acl': 'bucket-owner-full-control'
       },
       body: JSON.stringify(dataset.registrations),
     })
