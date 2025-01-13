@@ -1,22 +1,16 @@
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { timeDetectService } from "@/services/timeDetectService";
-import { useToast } from "@/components/ui/use-toast";
+import { useToast } from "@/hooks/use-toast";
 import { ArrowLeft, RefreshCw, Save } from "lucide-react";
 import { Link } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
 import { DatasetState, INITIAL_DATASET_STATE } from "@/stores/datasetStore";
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from "@/components/ui/table";
-import { ScrollArea } from "@/components/ui/scroll-area";
 import { supabase } from "@/integrations/supabase/client";
 import { Json } from "@/integrations/supabase/types";
+import { DatasetsTable } from "@/components/DatasetsTable";
+
+// ... keep existing code (imports and type definitions)
 
 const TimeDetectTest = () => {
   const { toast } = useToast();
@@ -47,7 +41,6 @@ const TimeDetectTest = () => {
 
     setIsSavingDataset(true);
     try {
-      // Convert the registrations array to a JSON-compatible format
       const serializedRegistrations = dataset.registrations.map(reg => {
         const serializedPattern = reg.employeePattern ? {
           employeeId: reg.employeePattern.employeeId,
@@ -197,6 +190,9 @@ const TimeDetectTest = () => {
               </Button>
             </div>
           )}
+          
+          <DatasetsTable />
+
           <div className="space-y-4">
             <div>
               <h2 className="text-lg font-semibold mb-2">Test Connection</h2>
