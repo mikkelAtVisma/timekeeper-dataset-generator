@@ -71,19 +71,11 @@ serve(async (req) => {
       }))
     }
 
-    // Parse the presigned URL to remove any auth headers
-    const presignedUrlObj = new URL(job.presigned_url)
-    const cleanPresignedUrl = presignedUrlObj.toString()
-
-    // Debug logging
-    console.log('Clean Presigned URL:', cleanPresignedUrl)
-    console.log('Request Headers:', {
-      'Content-Type': 'application/json'
-    })
-    console.log('Request Body:', JSON.stringify(formattedDataset, null, 2))
-
-    const response = await fetch(cleanPresignedUrl, {
+    const response = await fetch(job.presigned_url, {
       method: 'PUT',
+      headers: {
+        //Empty headers to avoid any default headers
+      },
       body: JSON.stringify(formattedDataset),
     })
 
