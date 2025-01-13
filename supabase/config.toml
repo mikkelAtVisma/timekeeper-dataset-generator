@@ -1,1 +1,3 @@
 project_id = "myapedwslmipqgngeamd"
+[functions.timedetect]
+verify_jwt = false

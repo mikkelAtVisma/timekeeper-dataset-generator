@@ -1,8 +1,7 @@
-import { timeDetectAuth } from '../utils/timeDetectAuth';
+import { supabase } from '../integrations/supabase/client';
 
 export class TimeDetectService {
   private static instance: TimeDetectService;
-  private baseUrl = 'https://api.machine-learning-factory.stage.visma.com/td';
 
   private constructor() {}
 
@@ -15,11 +14,16 @@ export class TimeDetectService {
 
   async testConnection(): Promise<boolean> {
     try {
-      const headers = await timeDetectAuth.getAuthHeaders();
-      const response = await fetch(`${this.baseUrl}/health_check`, {
-        headers
+      const { data, error } = await supabase.functions.invoke('timedetect', {
+        method: 'GET',
       });
-      return response.ok;
+
+      if (error) {
+        console.error('Error testing TimeDetect connection:', error);
+        return false;
+      }
+
+      return data?.status === 'ok' || false;
     } catch (error) {
       console.error('Error testing TimeDetect connection:', error);
       return false;

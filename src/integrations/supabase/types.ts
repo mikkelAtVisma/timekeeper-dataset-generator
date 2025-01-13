@@ -9,7 +9,72 @@ export type Json =
 export type Database = {
   public: {
     Tables: {
-      [_ in never]: never
+      employee_patterns: {
+        Row: {
+          created_at: string
+          employee_id: string
+          id: string
+          pattern: Json
+        }
+        Insert: {
+          created_at?: string
+          employee_id: string
+          id?: string
+          pattern: Json
+        }
+        Update: {
+          created_at?: string
+          employee_id?: string
+          id?: string
+          pattern?: Json
+        }
+        Relationships: []
+      }
+      time_registrations: {
+        Row: {
+          break_duration: number
+          created_at: string
+          date: string
+          department_id: string
+          employee_id: string
+          end_time: number
+          id: string
+          project_id: string
+          public_holiday: boolean | null
+          start_time: number
+          work_category: string
+          work_duration: number
+        }
+        Insert: {
+          break_duration: number
+          created_at?: string
+          date: string
+          department_id: string
+          employee_id: string
+          end_time: number
+          id?: string
+          project_id: string
+          public_holiday?: boolean | null
+          start_time: number
+          work_category: string
+          work_duration: number
+        }
+        Update: {
+          break_duration?: number
+          created_at?: string
+          date?: string
+          department_id?: string
+          employee_id?: string
+          end_time?: number
+          id?: string
+          project_id?: string
+          public_holiday?: boolean | null
+          start_time?: number
+          work_category?: string
+          work_duration?: number
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
