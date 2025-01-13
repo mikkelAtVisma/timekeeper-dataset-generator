@@ -14,6 +14,7 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
+import { ScrollArea } from "@/components/ui/scroll-area";
 
 const TimeDetectTest = () => {
   const { toast } = useToast();
@@ -122,37 +123,45 @@ const TimeDetectTest = () => {
 
             <div className="border-t pt-4">
               <h2 className="text-lg font-semibold mb-4">TimeDetect Jobs</h2>
-              <div className="rounded-md border">
+              <ScrollArea className="h-[400px] rounded-md border">
                 <Table>
                   <TableHeader>
                     <TableRow>
                       <TableHead>Job ID</TableHead>
                       <TableHead>Status</TableHead>
+                      <TableHead>Dataset ID</TableHead>
+                      <TableHead>Customer ID</TableHead>
                       <TableHead>Created At</TableHead>
                       <TableHead>Completed At</TableHead>
+                      <TableHead className="max-w-[300px]">Presigned URL</TableHead>
                     </TableRow>
                   </TableHeader>
                   <TableBody>
                     {jobs.map((job) => (
                       <TableRow key={job.id}>
                         <TableCell className="font-medium">{job.job_id}</TableCell>
-                        <TableCell>{job.status}</TableCell>
+                        <TableCell>{job.status || 'pending'}</TableCell>
+                        <TableCell>{job.dataset_id}</TableCell>
+                        <TableCell>{job.customer_id}</TableCell>
                         <TableCell>{formatDate(job.created_at)}</TableCell>
                         <TableCell>
                           {job.completed_at ? formatDate(job.completed_at) : '-'}
+                        </TableCell>
+                        <TableCell className="max-w-[300px] truncate" title={job.presigned_url}>
+                          {job.presigned_url}
                         </TableCell>
                       </TableRow>
                     ))}
                     {jobs.length === 0 && (
                       <TableRow>
-                        <TableCell colSpan={4} className="text-center py-4 text-gray-500">
+                        <TableCell colSpan={7} className="text-center py-4 text-gray-500">
                           No jobs found
                         </TableCell>
                       </TableRow>
                     )}
                   </TableBody>
                 </Table>
-              </div>
+              </ScrollArea>
             </div>
           </div>
         </div>
