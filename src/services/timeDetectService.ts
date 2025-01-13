@@ -17,7 +17,6 @@ export class TimeDetectService {
     try {
       console.log('Testing TimeDetect connection...');
 
-      // Fire off the Supabase function request, racing against a timeout
       const { error } = await Promise.race([
         supabase.functions.invoke('timedetect-health', {
           method: 'GET',
@@ -27,14 +26,12 @@ export class TimeDetectService {
         )
       ]) as { data?: any; error?: any };
 
-      // If there's an error, log it and return false
       if (error) {
         console.error('Error testing TimeDetect connection:', error);
         return false;
       }
 
       console.log('TimeDetect health check succeeded');
-      // If no error, the call was presumably 200 OK
       return true;
     } catch (err) {
       console.error('Error testing TimeDetect connection:', err);
@@ -45,7 +42,7 @@ export class TimeDetectService {
   async getPresignedUrl(): Promise<{ url: string; jobId: string; message: string }> {
     try {
       console.log('Requesting presigned URL...');
-
+      
       const { data, error } = await Promise.race([
         supabase.functions.invoke('timedetect-presigned', {
           method: 'GET',
@@ -61,9 +58,44 @@ export class TimeDetectService {
       }
 
       console.log('Presigned URL response:', data);
+
+      // Store the response in the database
+      const { error: insertError } = await supabase
+        .from('timedetect_jobs')
+        .insert({
+          job_id: data.jobId,
+          presigned_url: data.url,
+          dataset_id: 'default', // You might want to make this configurable
+          customer_id: 'time.reg.benchmark', // You might want to make this configurable
+        });
+
+      if (insertError) {
+        console.error('Error storing presigned URL in database:', insertError);
+        throw insertError;
+      }
+
       return data;
     } catch (err) {
       console.error('Error getting presigned URL:', err);
+      throw err;
+    }
+  }
+
+  async getTimeDetectJobs() {
+    try {
+      const { data, error } = await supabase
+        .from('timedetect_jobs')
+        .select('*')
+        .order('created_at', { ascending: false });
+
+      if (error) {
+        console.error('Error fetching TimeDetect jobs:', error);
+        throw error;
+      }
+
+      return data;
+    } catch (err) {
+      console.error('Error fetching TimeDetect jobs:', err);
       throw err;
     }
   }

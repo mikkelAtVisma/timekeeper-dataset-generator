@@ -6,6 +6,14 @@ import { ArrowLeft } from "lucide-react";
 import { Link } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
 import { DatasetState, INITIAL_DATASET_STATE } from "@/stores/datasetStore";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
 
 const TimeDetectTest = () => {
   const { toast } = useToast();
@@ -15,6 +23,11 @@ const TimeDetectTest = () => {
   const { data: dataset = INITIAL_DATASET_STATE } = useQuery<DatasetState>({
     queryKey: ['dataset'],
     initialData: INITIAL_DATASET_STATE,
+  });
+
+  const { data: jobs = [], refetch: refetchJobs } = useQuery({
+    queryKey: ['timedetect-jobs'],
+    queryFn: () => timeDetectService.getTimeDetectJobs(),
   });
 
   const handleTestConnection = async () => {
@@ -43,6 +56,7 @@ const TimeDetectTest = () => {
     setIsGettingUrl(true);
     try {
       const response = await timeDetectService.getPresignedUrl();
+      await refetchJobs();
       toast({
         title: "Presigned URL Generated",
         description: `Job ID: ${response.jobId}`,
@@ -56,6 +70,10 @@ const TimeDetectTest = () => {
     } finally {
       setIsGettingUrl(false);
     }
+  };
+
+  const formatDate = (dateString: string) => {
+    return new Date(dateString).toLocaleString();
   };
 
   return (
@@ -100,6 +118,41 @@ const TimeDetectTest = () => {
               >
                 {isGettingUrl ? "Generating..." : "Get Presigned URL"}
               </Button>
+            </div>
+
+            <div className="border-t pt-4">
+              <h2 className="text-lg font-semibold mb-4">TimeDetect Jobs</h2>
+              <div className="rounded-md border">
+                <Table>
+                  <TableHeader>
+                    <TableRow>
+                      <TableHead>Job ID</TableHead>
+                      <TableHead>Status</TableHead>
+                      <TableHead>Created At</TableHead>
+                      <TableHead>Completed At</TableHead>
+                    </TableRow>
+                  </TableHeader>
+                  <TableBody>
+                    {jobs.map((job) => (
+                      <TableRow key={job.id}>
+                        <TableCell className="font-medium">{job.job_id}</TableCell>
+                        <TableCell>{job.status}</TableCell>
+                        <TableCell>{formatDate(job.created_at)}</TableCell>
+                        <TableCell>
+                          {job.completed_at ? formatDate(job.completed_at) : '-'}
+                        </TableCell>
+                      </TableRow>
+                    ))}
+                    {jobs.length === 0 && (
+                      <TableRow>
+                        <TableCell colSpan={4} className="text-center py-4 text-gray-500">
+                          No jobs found
+                        </TableCell>
+                      </TableRow>
+                    )}
+                  </TableBody>
+                </Table>
+              </div>
             </div>
           </div>
         </div>
