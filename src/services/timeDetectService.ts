@@ -16,25 +16,28 @@ export class TimeDetectService {
   async testConnection(): Promise<boolean> {
     try {
       console.log('Testing TimeDetect connection...');
-      
-      const { data, error } = await Promise.race([
+
+      // Fire off the Supabase function request, racing against a timeout
+      const { error } = await Promise.race([
         supabase.functions.invoke('timedetect-health', {
           method: 'GET',
         }),
-        new Promise((_, reject) => 
+        new Promise((_, reject) =>
           setTimeout(() => reject(new Error('Connection timeout')), this.TIMEOUT)
         )
-      ]) as any;
+      ]) as { data?: any; error?: any };
 
+      // If there's an error, log it and return false
       if (error) {
         console.error('Error testing TimeDetect connection:', error);
         return false;
       }
 
-      console.log('TimeDetect response:', data);
-      return data?.status === 'ok' && !!data;
-    } catch (error) {
-      console.error('Error testing TimeDetect connection:', error);
+      console.log('TimeDetect health check succeeded');
+      // If no error, the call was presumably 200 OK
+      return true;
+    } catch (err) {
+      console.error('Error testing TimeDetect connection:', err);
       return false;
     }
   }
@@ -42,15 +45,15 @@ export class TimeDetectService {
   async getPresignedUrl(): Promise<{ url: string; jobId: string; message: string }> {
     try {
       console.log('Requesting presigned URL...');
-      
+
       const { data, error } = await Promise.race([
         supabase.functions.invoke('timedetect-presigned', {
           method: 'GET',
         }),
-        new Promise((_, reject) => 
+        new Promise((_, reject) =>
           setTimeout(() => reject(new Error('Connection timeout')), this.TIMEOUT)
         )
-      ]) as any;
+      ]) as { data?: any; error?: any };
 
       if (error) {
         console.error('Error getting presigned URL:', error);
@@ -59,9 +62,9 @@ export class TimeDetectService {
 
       console.log('Presigned URL response:', data);
       return data;
-    } catch (error) {
-      console.error('Error getting presigned URL:', error);
-      throw error;
+    } catch (err) {
+      console.error('Error getting presigned URL:', err);
+      throw err;
     }
   }
 }
