@@ -1,5 +1,6 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts"
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2'
+import { timeDetectAuth } from "../_shared/timeDetectAuth.ts"
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
@@ -46,12 +47,15 @@ serve(async (req) => {
       throw new Error('Job not found')
     }
 
+    // 3. Get TimeDetect auth headers
+    const authHeaders = await timeDetectAuth.getAuthHeaders()
     console.log('Uploading data to presigned URL:', job.presigned_url)
 
-    // 3. Upload the data to the presigned URL with correct headers
+    // 4. Upload the data to the presigned URL with correct headers
     const response = await fetch(job.presigned_url, {
       method: 'PUT',
       headers: {
+        ...authHeaders,
         'Content-Type': 'application/json',
         'x-amz-acl': 'bucket-owner-full-control'
       },
@@ -64,7 +68,7 @@ serve(async (req) => {
       throw new Error(`Failed to upload to presigned URL: ${response.statusText}. Status: ${response.status}. Error: ${errorText}`)
     }
 
-    // 4. Update the job status and dataset_id
+    // 5. Update the job status and dataset_id
     const { error: updateError } = await supabaseClient
       .from('timedetect_jobs')
       .update({
