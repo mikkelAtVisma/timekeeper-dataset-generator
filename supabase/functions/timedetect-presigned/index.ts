@@ -49,7 +49,7 @@ serve(async (req) => {
     const data = await presignedResponse.json()
     console.log('Received presigned URL response:', data)
 
-    // 5. Store the response in the database
+    // 5. Store the response in the database (without dataset_id)
     const { error: insertError } = await supabaseClient
       .from('timedetect_jobs')
       .insert({
