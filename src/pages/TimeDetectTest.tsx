@@ -2,7 +2,7 @@ import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { timeDetectService } from "@/services/timeDetectService";
 import { useToast } from "@/components/ui/use-toast";
-import { ArrowLeft, RefreshCw } from "lucide-react";
+import { ArrowLeft, RefreshCw, Save } from "lucide-react";
 import { Link } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
 import { DatasetState, INITIAL_DATASET_STATE } from "@/stores/datasetStore";
@@ -15,11 +15,13 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { ScrollArea } from "@/components/ui/scroll-area";
+import { supabase } from "@/integrations/supabase/client";
 
 const TimeDetectTest = () => {
   const { toast } = useToast();
   const [isLoading, setIsLoading] = useState(false);
   const [isGettingUrl, setIsGettingUrl] = useState(false);
+  const [isSavingDataset, setIsSavingDataset] = useState(false);
 
   const { data: dataset = INITIAL_DATASET_STATE } = useQuery<DatasetState>({
     queryKey: ['dataset'],
@@ -31,6 +33,44 @@ const TimeDetectTest = () => {
     queryFn: () => timeDetectService.getTimeDetectJobs(),
     refetchOnWindowFocus: true,
   });
+
+  const handleSaveDataset = async () => {
+    if (!dataset.registrations.length) {
+      toast({
+        title: "No data to save",
+        description: "Please generate a dataset first",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    setIsSavingDataset(true);
+    try {
+      const { error } = await supabase
+        .from('datasets')
+        .insert({
+          registrations: dataset.registrations,
+          start_date: dataset.startDate,
+          end_date: dataset.endDate,
+        });
+
+      if (error) throw error;
+
+      toast({
+        title: "Dataset saved",
+        description: "The dataset has been saved successfully",
+      });
+    } catch (error) {
+      console.error('Error saving dataset:', error);
+      toast({
+        title: "Error",
+        description: "Failed to save the dataset",
+        variant: "destructive",
+      });
+    } finally {
+      setIsSavingDataset(false);
+    }
+  };
 
   const handleTestConnection = async () => {
     setIsLoading(true);
@@ -106,8 +146,18 @@ const TimeDetectTest = () => {
         
         <div className="bg-white p-6 rounded-lg shadow-sm space-y-6">
           {dataset.registrations.length > 0 && (
-            <div className="text-gray-600 mb-4">
-              Dataset with {dataset.registrations.length} registrations
+            <div className="flex justify-between items-center">
+              <div className="text-gray-600">
+                Dataset with {dataset.registrations.length} registrations
+              </div>
+              <Button 
+                onClick={handleSaveDataset} 
+                disabled={isSavingDataset}
+                className="gap-2"
+              >
+                <Save className="h-4 w-4" />
+                {isSavingDataset ? "Saving..." : "Save Dataset"}
+              </Button>
             </div>
           )}
           <div className="space-y-4">
