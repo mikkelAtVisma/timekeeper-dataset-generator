@@ -51,3 +51,7 @@ export const loadPersistedDataset = (): DatasetState => {
 export const persistDataset = (dataset: DatasetState) => {
   debouncePersist(dataset);
 };
+
+export function clearSavedDataset() {
+  localStorage.removeItem(STORAGE_KEY);
+}

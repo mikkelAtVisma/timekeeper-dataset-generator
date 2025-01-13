@@ -9,6 +9,7 @@ import { Button } from "@/components/ui/button";
 import { Trash2, ExternalLink } from "lucide-react";
 import { useToast } from "@/components/ui/use-toast";
 import { useNavigate } from "react-router-dom";
+import { clearSavedDataset } from "@/stores/datasetStore";
 
 const Index = () => {
   const { toast } = useToast();
@@ -19,6 +20,7 @@ const Index = () => {
   const [clearTrigger, setClearTrigger] = useState(0);
   const [currentStartDate, setCurrentStartDate] = useState("");
   const [currentEndDate, setCurrentEndDate] = useState("");
+
   
   // Memoize settings to prevent unnecessary re-renders
   const [currentSettings] = useState({
@@ -59,6 +61,10 @@ const Index = () => {
     setClearTrigger(prev => prev + 1);
     setCurrentStartDate("");
     setCurrentEndDate("");
+
+    // Also clear dataset from local storage
+    clearSavedDataset();
+
     toast({
       title: "Dataset cleared",
       description: "All registrations and patterns have been removed",
