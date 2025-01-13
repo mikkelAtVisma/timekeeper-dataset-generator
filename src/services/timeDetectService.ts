@@ -14,16 +14,20 @@ export class TimeDetectService {
 
   async testConnection(): Promise<boolean> {
     try {
+      console.log('Testing TimeDetect connection...');
       const { data, error } = await supabase.functions.invoke('timedetect', {
         method: 'GET',
       });
+
+      console.log('TimeDetect response:', { data, error });
 
       if (error) {
         console.error('Error testing TimeDetect connection:', error);
         return false;
       }
 
-      return data?.status === 'ok' || false;
+      // Check both the status field and that we have data
+      return data?.status === 'ok' && !!data;
     } catch (error) {
       console.error('Error testing TimeDetect connection:', error);
       return false;
