@@ -25,10 +25,10 @@ const getInitialEndDate = () => {
 
 interface DatasetGenerationFormProps {
   onGenerate: (registrations: TimeRegistration[], startDate: string, endDate: string) => void;
-  onClear?: () => void;
+  clearTrigger?: number;
 }
 
-export const DatasetGenerationForm = ({ onGenerate, onClear }: DatasetGenerationFormProps) => {
+export const DatasetGenerationForm = ({ onGenerate, clearTrigger }: DatasetGenerationFormProps) => {
   const queryClient = useQueryClient();
   const { toast } = useToast();
   const [numEmployees, setNumEmployees] = useState(5);
@@ -114,12 +114,12 @@ export const DatasetGenerationForm = ({ onGenerate, onClear }: DatasetGeneration
     }
   }, [dataset, onGenerate, extractedPatterns]);
 
-  // Clear pattern cache when clear is triggered
+  // Add a new effect for clearTrigger
   useEffect(() => {
-    if (onClear) {
+    if (clearTrigger && clearTrigger > 0) {
       setPatternCache(new Map());
     }
-  }, [onClear]);
+  }, [clearTrigger]);
 
   const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();

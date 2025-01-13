@@ -99,8 +99,8 @@ const Index = () => {
         <div className="bg-white p-6 rounded-lg shadow-sm space-y-6">
           <h2 className="text-xl font-semibold">Dataset Generation</h2>
           <DatasetGenerationForm 
-            onGenerate={handleGenerateDataset} 
-            onClear={clearTrigger > 0 ? () => {} : undefined}
+            onGenerate={handleGenerateDataset}
+            clearTrigger={clearTrigger}
           />
         </div>
         
