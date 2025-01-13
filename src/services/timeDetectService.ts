@@ -41,6 +41,8 @@ export class TimeDetectService {
 
   async getPresignedUrl(): Promise<{ url: string; jobId: string; message: string }> {
     try {
+      console.log('Requesting presigned URL...');
+      
       const { data, error } = await Promise.race([
         supabase.functions.invoke('timedetect-presigned', {
           method: 'GET',

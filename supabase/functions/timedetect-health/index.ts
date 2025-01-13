@@ -14,11 +14,11 @@ serve(async (req) => {
   try {
     console.log('Health check requested')
     
-    // Simulate a quick health check
-    const status = 'ok'
-    
     return new Response(
-      JSON.stringify({ status, timestamp: new Date().toISOString() }),
+      JSON.stringify({ 
+        status: 'ok',
+        timestamp: new Date().toISOString()
+      }),
       { 
         headers: { ...corsHeaders, "Content-Type": "application/json" },
         status: 200 
