@@ -46,10 +46,17 @@ const TimeDetectTest = () => {
 
     setIsSavingDataset(true);
     try {
+      // Convert the registrations array to a plain object array to ensure proper JSON serialization
+      const serializedRegistrations = dataset.registrations.map(reg => ({
+        ...reg,
+        numericals: reg.numericals || [],
+        employeePattern: reg.employeePattern || null
+      }));
+
       const { error } = await supabase
         .from('datasets')
         .insert({
-          registrations: dataset.registrations,
+          registrations: serializedRegistrations,
           start_date: dataset.startDate,
           end_date: dataset.endDate,
         });
