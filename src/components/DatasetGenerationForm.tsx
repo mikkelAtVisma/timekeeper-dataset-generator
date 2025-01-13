@@ -64,9 +64,10 @@ export const DatasetGenerationForm = ({ onGenerate, onClear }: DatasetGeneration
   // Query to load the dataset with proper caching
   const { data: dataset } = useQuery({
     queryKey: ['dataset'],
+    queryFn: () => INITIAL_DATASET_STATE,
     initialData: INITIAL_DATASET_STATE,
     staleTime: Infinity,
-    cacheTime: Infinity
+    gcTime: Infinity
   });
 
   // Memoize pattern extraction
