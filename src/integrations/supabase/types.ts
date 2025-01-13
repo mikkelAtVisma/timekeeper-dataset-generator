@@ -80,7 +80,7 @@ export type Database = {
           completed_at: string | null
           created_at: string
           customer_id: string
-          dataset_id: string
+          dataset_id: string | null
           id: string
           job_id: string
           presigned_url: string
@@ -90,7 +90,7 @@ export type Database = {
           completed_at?: string | null
           created_at?: string
           customer_id: string
-          dataset_id: string
+          dataset_id?: string | null
           id?: string
           job_id: string
           presigned_url: string
@@ -100,7 +100,7 @@ export type Database = {
           completed_at?: string | null
           created_at?: string
           customer_id?: string
-          dataset_id?: string
+          dataset_id?: string | null
           id?: string
           job_id?: string
           presigned_url?: string
