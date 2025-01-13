@@ -71,7 +71,18 @@ serve(async (req) => {
       }))
     }
 
-    const response = await fetch(job.presigned_url, {
+    // Parse the presigned URL to remove any auth headers
+    const presignedUrlObj = new URL(job.presigned_url)
+    const cleanPresignedUrl = presignedUrlObj.toString()
+
+    // Debug logging
+    console.log('Clean Presigned URL:', cleanPresignedUrl)
+    console.log('Request Headers:', {
+      'Content-Type': 'application/json'
+    })
+    console.log('Request Body:', JSON.stringify(formattedDataset, null, 2))
+
+    const response = await fetch(cleanPresignedUrl, {
       method: 'PUT',
       headers: {
         'Content-Type': 'application/json',
@@ -79,9 +90,12 @@ serve(async (req) => {
       body: JSON.stringify(formattedDataset),
     })
 
+    // Log response details
     if (!response.ok) {
       const errorText = await response.text()
-      console.error('Upload failed:', response.status, errorText)
+      console.log('Response Status:', response.status)
+      console.log('Response Headers:', Object.fromEntries(response.headers))
+      console.log('Response Error:', errorText)
       throw new Error(`Failed to upload to presigned URL: ${response.statusText}. Status: ${response.status}. Error: ${errorText}`)
     }
 
