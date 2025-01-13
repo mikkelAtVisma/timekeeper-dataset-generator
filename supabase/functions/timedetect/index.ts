@@ -26,7 +26,7 @@ serve(async (req) => {
       const response = await fetch(`${baseUrl}/presigned_url`, {
         headers: {
           ...headers,
-          'tenantId': headers.Authorization.split(' ')[1], // Use the token as tenantId as specified
+          'tenantId': 'time.reg.benchmark', // Use the client_id as tenantId
         },
       })
 
