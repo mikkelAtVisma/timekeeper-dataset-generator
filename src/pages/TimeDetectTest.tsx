@@ -9,8 +9,7 @@ import { DatasetState, INITIAL_DATASET_STATE } from "@/stores/datasetStore";
 import { supabase } from "@/integrations/supabase/client";
 import { Json } from "@/integrations/supabase/types";
 import { DatasetsTable } from "@/components/DatasetsTable";
-import { ScrollArea } from "@/components/ui/scroll-area";
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import { TimeDetectJobsTable } from "@/components/TimeDetectJobsTable";
 
 const TimeDetectTest = () => {
   const { toast } = useToast();
@@ -160,10 +159,6 @@ const TimeDetectTest = () => {
     }
   };
 
-  const formatDate = (dateString: string) => {
-    return new Date(dateString).toLocaleString();
-  };
-
   return (
     <div className="min-h-screen bg-gray-50 py-8">
       <div className="container mx-auto px-4 space-y-8">
@@ -223,7 +218,6 @@ const TimeDetectTest = () => {
 
             <div className="border-t pt-4">
               <div className="flex justify-between items-center mb-4">
-                <h2 className="text-lg font-semibold">TimeDetect Jobs</h2>
                 <Button
                   onClick={handleRefreshJobs}
                   variant="outline"
@@ -235,46 +229,7 @@ const TimeDetectTest = () => {
                   {isLoadingJobs ? 'Refreshing...' : 'Refresh Jobs'}
                 </Button>
               </div>
-              <ScrollArea className="h-[400px] rounded-md border">
-                <Table>
-                  <TableHeader>
-                    <TableRow>
-                      <TableHead>Job ID</TableHead>
-                      <TableHead>Status</TableHead>
-                      <TableHead>Dataset ID</TableHead>
-                      <TableHead>Customer ID</TableHead>
-                      <TableHead>Created At</TableHead>
-                      <TableHead>Completed At</TableHead>
-                      <TableHead className="max-w-[300px]">Presigned URL</TableHead>
-                    </TableRow>
-                  </TableHeader>
-                  <TableBody>
-                    {jobs && jobs.length > 0 ? (
-                      jobs.map((job) => (
-                        <TableRow key={job.id}>
-                          <TableCell className="font-medium">{job.job_id}</TableCell>
-                          <TableCell>{job.status || 'pending'}</TableCell>
-                          <TableCell>{job.dataset_id}</TableCell>
-                          <TableCell>{job.customer_id}</TableCell>
-                          <TableCell>{formatDate(job.created_at)}</TableCell>
-                          <TableCell>
-                            {job.completed_at ? formatDate(job.completed_at) : '-'}
-                          </TableCell>
-                          <TableCell className="max-w-[300px] truncate" title={job.presigned_url}>
-                            {job.presigned_url}
-                          </TableCell>
-                        </TableRow>
-                      ))
-                    ) : (
-                      <TableRow>
-                        <TableCell colSpan={7} className="text-center py-4 text-gray-500">
-                          {isLoadingJobs ? 'Loading jobs...' : 'No jobs found'}
-                        </TableCell>
-                      </TableRow>
-                    )}
-                  </TableBody>
-                </Table>
-              </ScrollArea>
+              <TimeDetectJobsTable jobs={jobs} isLoading={isLoadingJobs} />
             </div>
           </div>
         </div>
