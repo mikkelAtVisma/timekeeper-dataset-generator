@@ -26,12 +26,25 @@ export class TimeDetectService {
         return false;
       }
 
-      // Check both the status field and that we have data
       return data?.status === 'ok' && !!data;
     } catch (error) {
       console.error('Error testing TimeDetect connection:', error);
       return false;
     }
+  }
+
+  async getPresignedUrl(): Promise<{ url: string; jobId: string; message: string }> {
+    const { data, error } = await supabase.functions.invoke('timedetect', {
+      method: 'GET',
+      path: 'presigned_url',
+    });
+
+    if (error) {
+      console.error('Error getting presigned URL:', error);
+      throw error;
+    }
+
+    return data;
   }
 }
 

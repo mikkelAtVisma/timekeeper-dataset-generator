@@ -1,4 +1,5 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts"
+import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.7.1'
 import { timeDetectAuth } from './timeDetectAuth.ts'
 
 const corsHeaders = {
@@ -13,6 +14,57 @@ serve(async (req) => {
   }
 
   try {
+    const url = new URL(req.url)
+    const path = url.pathname.split('/')[1]
+
+    if (path === 'presigned_url') {
+      console.log('Requesting presigned URL from TimeDetect API...')
+      
+      const baseUrl = 'https://api.machine-learning-factory.stage.visma.com/td'
+      const headers = await timeDetectAuth.getAuthHeaders()
+
+      const response = await fetch(`${baseUrl}/presigned_url`, {
+        headers: {
+          ...headers,
+          'tenantId': headers.Authorization.split(' ')[1], // Use the token as tenantId as specified
+        },
+      })
+
+      const data = await response.json()
+      console.log('TimeDetect API Response:', data)
+
+      if (!response.ok) {
+        throw new Error(`Failed to get presigned URL: ${data.message || response.statusText}`)
+      }
+
+      // Create Supabase client
+      const supabase = createClient(
+        Deno.env.get('SUPABASE_URL') ?? '',
+        Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? ''
+      )
+
+      // Store the job information
+      const { error: dbError } = await supabase
+        .from('timedetect_jobs')
+        .insert({
+          job_id: data.jobId,
+          presigned_url: data.url,
+          dataset_id: crypto.randomUUID(), // Generate a unique dataset ID
+          customer_id: crypto.randomUUID(), // Generate a unique customer ID
+        })
+
+      if (dbError) {
+        console.error('Error storing job information:', dbError)
+        throw new Error('Failed to store job information')
+      }
+
+      return new Response(
+        JSON.stringify(data),
+        { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      )
+    }
+
+    // Health check endpoint
     const baseUrl = 'https://api.machine-learning-factory.stage.visma.com/td'
     const headers = await timeDetectAuth.getAuthHeaders()
 

@@ -75,6 +75,39 @@ export type Database = {
         }
         Relationships: []
       }
+      timedetect_jobs: {
+        Row: {
+          completed_at: string | null
+          created_at: string
+          customer_id: string
+          dataset_id: string
+          id: string
+          job_id: string
+          presigned_url: string
+          status: string | null
+        }
+        Insert: {
+          completed_at?: string | null
+          created_at?: string
+          customer_id: string
+          dataset_id: string
+          id?: string
+          job_id: string
+          presigned_url: string
+          status?: string | null
+        }
+        Update: {
+          completed_at?: string | null
+          created_at?: string
+          customer_id?: string
+          dataset_id?: string
+          id?: string
+          job_id?: string
+          presigned_url?: string
+          status?: string | null
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never

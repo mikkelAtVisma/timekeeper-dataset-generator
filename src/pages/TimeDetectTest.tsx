@@ -10,6 +10,7 @@ import { DatasetState, INITIAL_DATASET_STATE } from "@/stores/datasetStore";
 const TimeDetectTest = () => {
   const { toast } = useToast();
   const [isLoading, setIsLoading] = useState(false);
+  const [isGettingUrl, setIsGettingUrl] = useState(false);
 
   const { data: dataset = INITIAL_DATASET_STATE } = useQuery<DatasetState>({
     queryKey: ['dataset'],
@@ -38,6 +39,25 @@ const TimeDetectTest = () => {
     }
   };
 
+  const handleGetPresignedUrl = async () => {
+    setIsGettingUrl(true);
+    try {
+      const response = await timeDetectService.getPresignedUrl();
+      toast({
+        title: "Presigned URL Generated",
+        description: `Job ID: ${response.jobId}`,
+      });
+    } catch (error) {
+      toast({
+        title: "Error",
+        description: "Failed to get presigned URL",
+        variant: "destructive",
+      });
+    } finally {
+      setIsGettingUrl(false);
+    }
+  };
+
   return (
     <div className="min-h-screen bg-gray-50 py-8">
       <div className="container mx-auto px-4 space-y-8">
@@ -54,15 +74,34 @@ const TimeDetectTest = () => {
               Dataset with {dataset.registrations.length} registrations
             </div>
           )}
-          <p className="text-gray-600">
-            Test the connection to the TimeDetect service by clicking the button below.
-          </p>
-          <Button 
-            onClick={handleTestConnection} 
-            disabled={isLoading}
-          >
-            {isLoading ? "Testing..." : "Test Connection"}
-          </Button>
+          <div className="space-y-4">
+            <div>
+              <h2 className="text-lg font-semibold mb-2">Test Connection</h2>
+              <p className="text-gray-600 mb-4">
+                Test the connection to the TimeDetect service by clicking the button below.
+              </p>
+              <Button 
+                onClick={handleTestConnection} 
+                disabled={isLoading}
+              >
+                {isLoading ? "Testing..." : "Test Connection"}
+              </Button>
+            </div>
+
+            <div className="border-t pt-4">
+              <h2 className="text-lg font-semibold mb-2">Get Presigned URL</h2>
+              <p className="text-gray-600 mb-4">
+                Generate a presigned URL for uploading data to TimeDetect.
+              </p>
+              <Button 
+                onClick={handleGetPresignedUrl} 
+                disabled={isGettingUrl}
+                variant="secondary"
+              >
+                {isGettingUrl ? "Generating..." : "Get Presigned URL"}
+              </Button>
+            </div>
+          </div>
         </div>
       </div>
     </div>
