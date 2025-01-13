@@ -84,9 +84,6 @@ serve(async (req) => {
 
     const response = await fetch(cleanPresignedUrl, {
       method: 'PUT',
-      headers: {
-        'Content-Type': 'application/json',
-      },
       body: JSON.stringify(formattedDataset),
     })
 
