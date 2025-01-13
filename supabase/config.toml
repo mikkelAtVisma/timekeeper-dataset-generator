@@ -1,3 +1,7 @@
 project_id = "myapedwslmipqgngeamd"
-[functions.timedetect]
+
+[functions.timedetect-health]
+verify_jwt = false
+
+[functions.timedetect-presigned]
 verify_jwt = false
