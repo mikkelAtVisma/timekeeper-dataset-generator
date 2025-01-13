@@ -28,20 +28,35 @@ serve(async (req) => {
       headers
     });
 
+    if (!response.ok) {
+      throw new Error(`TimeDetect API responded with status: ${response.status}`);
+    }
+
     const data = await response.json();
     console.log('TimeDetect health response:', data);
 
     return new Response(
       JSON.stringify({ status: 'ok', data }),
-      { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      { 
+        headers: { 
+          ...corsHeaders, 
+          'Content-Type': 'application/json' 
+        } 
+      }
     );
   } catch (error) {
     console.error('Error in health check:', error);
     return new Response(
-      JSON.stringify({ error: error.message }),
+      JSON.stringify({ 
+        error: error.message,
+        details: 'Failed to check TimeDetect health status'
+      }),
       { 
         status: 500,
-        headers: { ...corsHeaders, 'Content-Type': 'application/json' }
+        headers: { 
+          ...corsHeaders, 
+          'Content-Type': 'application/json' 
+        }
       }
     );
   }

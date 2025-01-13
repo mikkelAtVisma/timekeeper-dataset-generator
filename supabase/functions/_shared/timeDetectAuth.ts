@@ -26,7 +26,7 @@ export const timeDetectAuth = {
       });
 
       if (!response.ok) {
-        throw new Error('Failed to get TimeDetect token');
+        throw new Error(`Token request failed with status: ${response.status}`);
       }
 
       const data: TokenResponse = await response.json();
@@ -38,7 +38,7 @@ export const timeDetectAuth = {
       };
     } catch (error) {
       console.error('Error getting TimeDetect token:', error);
-      throw error;
+      throw new Error(`Authentication failed: ${error.message}`);
     }
   }
 }

@@ -21,6 +21,9 @@ serve(async (req) => {
     const headers = await timeDetectAuth.getAuthHeaders();
     console.log('Auth headers received successfully');
 
+    const jobId = crypto.randomUUID();
+    console.log('Generated job ID:', jobId);
+
     // Make request to TimeDetect presigned URL endpoint
     console.log('Making request to TimeDetect presigned URL endpoint...');
     const response = await fetch('https://api.timedetect.com/presigned', {
@@ -28,24 +31,39 @@ serve(async (req) => {
       headers,
       body: JSON.stringify({
         tenantId: 'time.reg.benchmark',
-        jobId: crypto.randomUUID()
+        jobId
       })
     });
 
+    if (!response.ok) {
+      throw new Error(`TimeDetect API responded with status: ${response.status}`);
+    }
+
     const data = await response.json();
-    console.log('TimeDetect presigned URL response:', data);
+    console.log('TimeDetect presigned URL response received');
 
     return new Response(
       JSON.stringify(data),
-      { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      { 
+        headers: { 
+          ...corsHeaders, 
+          'Content-Type': 'application/json' 
+        } 
+      }
     );
   } catch (error) {
     console.error('Error getting presigned URL:', error);
     return new Response(
-      JSON.stringify({ error: error.message }),
+      JSON.stringify({ 
+        error: error.message,
+        details: 'Failed to get presigned URL from TimeDetect'
+      }),
       { 
         status: 500,
-        headers: { ...corsHeaders, 'Content-Type': 'application/json' }
+        headers: { 
+          ...corsHeaders, 
+          'Content-Type': 'application/json' 
+        }
       }
     );
   }
