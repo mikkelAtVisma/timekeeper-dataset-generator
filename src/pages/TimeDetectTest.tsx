@@ -3,6 +3,7 @@ import { Link } from "react-router-dom";
 import { DatasetSection } from "@/components/DatasetSection";
 import { TimeDetectConnectionTest } from "@/components/TimeDetectConnectionTest";
 import { TimeDetectUrlSection } from "@/components/TimeDetectUrlSection";
+import { TimeDetectUploadSection } from "@/components/TimeDetectUploadSection";
 
 const TimeDetectTest = () => {
   return (
@@ -23,6 +24,10 @@ const TimeDetectTest = () => {
 
             <div className="border-t pt-4">
               <TimeDetectUrlSection />
+            </div>
+
+            <div className="border-t pt-4">
+              <TimeDetectUploadSection />
             </div>
           </div>
         </div>
