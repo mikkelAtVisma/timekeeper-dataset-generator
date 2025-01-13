@@ -25,7 +25,7 @@ serve(async (req) => {
     // 1. Fetch an auth token for TimeDetect
     const authHeaders = await timeDetectAuth.getAuthHeaders()
 
-    // 2. For demonstration, we'll use a hard-coded tenantId here
+    // 2. Use the client_id as tenantId
     const tenantId = "time.reg.benchmark"
 
     // 3. Call the TimeDetect presigned_url endpoint
