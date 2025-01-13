@@ -55,8 +55,8 @@ serve(async (req) => {
       .insert({
         job_id: data.jobId,
         presigned_url: data.url,
-        dataset_id: 'default',
         customer_id: tenantId,
+        status: 'ready_to_upload'
       })
 
     if (insertError) {
