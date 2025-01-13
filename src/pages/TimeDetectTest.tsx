@@ -2,7 +2,7 @@ import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { timeDetectService } from "@/services/timeDetectService";
 import { useToast } from "@/components/ui/use-toast";
-import { ArrowLeft } from "lucide-react";
+import { ArrowLeft, RefreshCw } from "lucide-react";
 import { Link } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
 import { DatasetState, INITIAL_DATASET_STATE } from "@/stores/datasetStore";
@@ -14,6 +14,7 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
+import { ScrollArea } from "@/components/ui/scroll-area";
 
 const TimeDetectTest = () => {
   const { toast } = useToast();
@@ -25,9 +26,10 @@ const TimeDetectTest = () => {
     initialData: INITIAL_DATASET_STATE,
   });
 
-  const { data: jobs = [], refetch: refetchJobs } = useQuery({
+  const { data: jobs = [], refetch: refetchJobs, isLoading: isLoadingJobs } = useQuery({
     queryKey: ['timedetect-jobs'],
     queryFn: () => timeDetectService.getTimeDetectJobs(),
+    refetchOnWindowFocus: true,
   });
 
   const handleTestConnection = async () => {
@@ -69,6 +71,22 @@ const TimeDetectTest = () => {
       });
     } finally {
       setIsGettingUrl(false);
+    }
+  };
+
+  const handleRefreshJobs = async () => {
+    try {
+      await refetchJobs();
+      toast({
+        title: "Jobs Refreshed",
+        description: "TimeDetect jobs list has been updated",
+      });
+    } catch (error) {
+      toast({
+        title: "Error",
+        description: "Failed to refresh jobs",
+        variant: "destructive",
+      });
     }
   };
 
@@ -121,38 +139,59 @@ const TimeDetectTest = () => {
             </div>
 
             <div className="border-t pt-4">
-              <h2 className="text-lg font-semibold mb-4">TimeDetect Jobs</h2>
-              <div className="rounded-md border">
+              <div className="flex justify-between items-center mb-4">
+                <h2 className="text-lg font-semibold">TimeDetect Jobs</h2>
+                <Button
+                  onClick={handleRefreshJobs}
+                  variant="outline"
+                  size="sm"
+                  className="gap-2"
+                  disabled={isLoadingJobs}
+                >
+                  <RefreshCw className={`h-4 w-4 ${isLoadingJobs ? 'animate-spin' : ''}`} />
+                  {isLoadingJobs ? 'Refreshing...' : 'Refresh Jobs'}
+                </Button>
+              </div>
+              <ScrollArea className="h-[400px] rounded-md border">
                 <Table>
                   <TableHeader>
                     <TableRow>
                       <TableHead>Job ID</TableHead>
                       <TableHead>Status</TableHead>
+                      <TableHead>Dataset ID</TableHead>
+                      <TableHead>Customer ID</TableHead>
                       <TableHead>Created At</TableHead>
                       <TableHead>Completed At</TableHead>
+                      <TableHead className="max-w-[300px]">Presigned URL</TableHead>
                     </TableRow>
                   </TableHeader>
                   <TableBody>
-                    {jobs.map((job) => (
-                      <TableRow key={job.id}>
-                        <TableCell className="font-medium">{job.job_id}</TableCell>
-                        <TableCell>{job.status}</TableCell>
-                        <TableCell>{formatDate(job.created_at)}</TableCell>
-                        <TableCell>
-                          {job.completed_at ? formatDate(job.completed_at) : '-'}
-                        </TableCell>
-                      </TableRow>
-                    ))}
-                    {jobs.length === 0 && (
+                    {jobs && jobs.length > 0 ? (
+                      jobs.map((job) => (
+                        <TableRow key={job.id}>
+                          <TableCell className="font-medium">{job.job_id}</TableCell>
+                          <TableCell>{job.status || 'pending'}</TableCell>
+                          <TableCell>{job.dataset_id}</TableCell>
+                          <TableCell>{job.customer_id}</TableCell>
+                          <TableCell>{formatDate(job.created_at)}</TableCell>
+                          <TableCell>
+                            {job.completed_at ? formatDate(job.completed_at) : '-'}
+                          </TableCell>
+                          <TableCell className="max-w-[300px] truncate" title={job.presigned_url}>
+                            {job.presigned_url}
+                          </TableCell>
+                        </TableRow>
+                      ))
+                    ) : (
                       <TableRow>
-                        <TableCell colSpan={4} className="text-center py-4 text-gray-500">
-                          No jobs found
+                        <TableCell colSpan={7} className="text-center py-4 text-gray-500">
+                          {isLoadingJobs ? 'Loading jobs...' : 'No jobs found'}
                         </TableCell>
                       </TableRow>
                     )}
                   </TableBody>
                 </Table>
-              </div>
+              </ScrollArea>
             </div>
           </div>
         </div>

@@ -67,6 +67,7 @@ export class TimeDetectService {
 
   async getTimeDetectJobs() {
     try {
+      console.log('Fetching TimeDetect jobs...');
       const { data, error } = await supabase
         .from('timedetect_jobs')
         .select('*')
@@ -77,7 +78,8 @@ export class TimeDetectService {
         throw error;
       }
 
-      return data;
+      console.log('TimeDetect jobs fetched:', data);
+      return data || [];
     } catch (err) {
       console.error('Error fetching TimeDetect jobs:', err);
       throw err;
