@@ -52,13 +52,32 @@ serve(async (req) => {
     console.log('Uploading data to presigned URL:', job.presigned_url)
 
     // 4. Upload the data to the presigned URL with correct headers
+    const formattedDataset = {
+      datasetId: datasetId,
+      customerId: dataset.customer_id, // Assuming customer_id is a field in your dataset
+      registrations: dataset.registrations.map(registration => ({
+        registrationId: registration.id,
+        date: registration.date,
+        employeeId: registration.employee_id,
+        projectId: registration.project_id,
+        departmentId: registration.department_id,
+        workCategory: registration.work_category,
+        startTime: registration.start_time,
+        endTime: registration.end_time,
+        workDuration: registration.work_duration,
+        breakDuration: registration.break_duration,
+        publicHoliday: registration.public_holiday,
+        numericals: registration.numericals // Assuming numericals is an array of objects
+      }))
+    }
+
     const response = await fetch(job.presigned_url, {
       method: 'PUT',
       headers: {
         ...authHeaders,
         'Content-Type': 'application/json',
       },
-      body: JSON.stringify(dataset.registrations),
+      body: JSON.stringify(formattedDataset),
     })
 
     if (!response.ok) {
