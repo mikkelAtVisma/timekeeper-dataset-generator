@@ -6,11 +6,13 @@ import { DatasetGenerationForm } from "../components/DatasetGenerationForm";
 import { GeneratePromptButton } from "../components/GeneratePromptButton";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Button } from "@/components/ui/button";
-import { Trash2 } from "lucide-react";
+import { Trash2, ExternalLink } from "lucide-react";
 import { useToast } from "@/components/ui/use-toast";
+import { useNavigate } from "react-router-dom";
 
 const Index = () => {
   const { toast } = useToast();
+  const navigate = useNavigate();
   const [registrations, setRegistrations] = useState<TimeRegistration[]>([]);
   const [selectedRegistrationId, setSelectedRegistrationId] = useState<string | null>(null);
   const [activeTab, setActiveTab] = useState("list");
@@ -67,6 +69,14 @@ const Index = () => {
         <div className="flex justify-between items-center">
           <h1 className="text-3xl font-bold text-gray-900">Time Registration</h1>
           <div className="flex gap-2">
+            <Button
+              variant="outline"
+              onClick={() => navigate('/timedetect-test')}
+              className="flex items-center gap-2"
+            >
+              <ExternalLink className="h-4 w-4" />
+              TimeDetect Test
+            </Button>
             <GeneratePromptButton 
               onGenerateDataset={handleGenerateDataset}
               currentSettings={currentSettings}
