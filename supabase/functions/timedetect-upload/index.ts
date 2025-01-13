@@ -46,17 +46,22 @@ serve(async (req) => {
       throw new Error('Job not found')
     }
 
-    // 3. Upload the data to the presigned URL
+    console.log('Uploading data to presigned URL:', job.presigned_url)
+
+    // 3. Upload the data to the presigned URL with correct headers
     const response = await fetch(job.presigned_url, {
       method: 'PUT',
       headers: {
         'Content-Type': 'application/json',
+        'x-amz-acl': 'bucket-owner-full-control'
       },
       body: JSON.stringify(dataset.registrations),
     })
 
     if (!response.ok) {
-      throw new Error(`Failed to upload to presigned URL: ${response.statusText}`)
+      const errorText = await response.text()
+      console.error('Upload failed:', response.status, errorText)
+      throw new Error(`Failed to upload to presigned URL: ${response.statusText}. Status: ${response.status}. Error: ${errorText}`)
     }
 
     // 4. Update the job status and dataset_id
