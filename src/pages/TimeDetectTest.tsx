@@ -26,9 +26,10 @@ const TimeDetectTest = () => {
     initialData: INITIAL_DATASET_STATE,
   });
 
-  const { data: jobs = [], refetch: refetchJobs } = useQuery({
+  const { data: jobs = [], refetch: refetchJobs, isLoading: isLoadingJobs } = useQuery({
     queryKey: ['timedetect-jobs'],
     queryFn: () => timeDetectService.getTimeDetectJobs(),
+    refetchOnWindowFocus: true,
   });
 
   const handleTestConnection = async () => {
@@ -145,9 +146,10 @@ const TimeDetectTest = () => {
                   variant="outline"
                   size="sm"
                   className="gap-2"
+                  disabled={isLoadingJobs}
                 >
-                  <RefreshCw className="h-4 w-4" />
-                  Refresh Jobs
+                  <RefreshCw className={`h-4 w-4 ${isLoadingJobs ? 'animate-spin' : ''}`} />
+                  {isLoadingJobs ? 'Refreshing...' : 'Refresh Jobs'}
                 </Button>
               </div>
               <ScrollArea className="h-[400px] rounded-md border">
@@ -164,25 +166,26 @@ const TimeDetectTest = () => {
                     </TableRow>
                   </TableHeader>
                   <TableBody>
-                    {jobs.map((job) => (
-                      <TableRow key={job.id}>
-                        <TableCell className="font-medium">{job.job_id}</TableCell>
-                        <TableCell>{job.status || 'pending'}</TableCell>
-                        <TableCell>{job.dataset_id}</TableCell>
-                        <TableCell>{job.customer_id}</TableCell>
-                        <TableCell>{formatDate(job.created_at)}</TableCell>
-                        <TableCell>
-                          {job.completed_at ? formatDate(job.completed_at) : '-'}
-                        </TableCell>
-                        <TableCell className="max-w-[300px] truncate" title={job.presigned_url}>
-                          {job.presigned_url}
-                        </TableCell>
-                      </TableRow>
-                    ))}
-                    {jobs.length === 0 && (
+                    {jobs && jobs.length > 0 ? (
+                      jobs.map((job) => (
+                        <TableRow key={job.id}>
+                          <TableCell className="font-medium">{job.job_id}</TableCell>
+                          <TableCell>{job.status || 'pending'}</TableCell>
+                          <TableCell>{job.dataset_id}</TableCell>
+                          <TableCell>{job.customer_id}</TableCell>
+                          <TableCell>{formatDate(job.created_at)}</TableCell>
+                          <TableCell>
+                            {job.completed_at ? formatDate(job.completed_at) : '-'}
+                          </TableCell>
+                          <TableCell className="max-w-[300px] truncate" title={job.presigned_url}>
+                            {job.presigned_url}
+                          </TableCell>
+                        </TableRow>
+                      ))
+                    ) : (
                       <TableRow>
                         <TableCell colSpan={7} className="text-center py-4 text-gray-500">
-                          No jobs found
+                          {isLoadingJobs ? 'Loading jobs...' : 'No jobs found'}
                         </TableCell>
                       </TableRow>
                     )}
