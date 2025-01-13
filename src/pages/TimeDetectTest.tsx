@@ -9,8 +9,8 @@ import { DatasetState, INITIAL_DATASET_STATE } from "@/stores/datasetStore";
 import { supabase } from "@/integrations/supabase/client";
 import { Json } from "@/integrations/supabase/types";
 import { DatasetsTable } from "@/components/DatasetsTable";
-
-// ... keep existing code (imports and type definitions)
+import { ScrollArea } from "@/components/ui/scroll-area";
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 
 const TimeDetectTest = () => {
   const { toast } = useToast();
