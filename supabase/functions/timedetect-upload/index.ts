@@ -52,50 +52,19 @@ serve(async (req) => {
     console.log('Uploading data to presigned URL:', job.presigned_url)
 
     // 4. Upload the data to the presigned URL with correct headers
-    const formattedDataset = {
-      datasetId: datasetId,
-      customerId: 'testing', // Assuming customer_id is a field in your dataset
-      registrations: dataset.registrations.map(registration => ({
-        registrationId: registration.id,
-        date: registration.date,
-        employeeId: registration.employee_id,
-        projectId: registration.project_id,
-        departmentId: registration.department_id,
-        workCategory: registration.work_category,
-        startTime: registration.start_time,
-        endTime: registration.end_time,
-        workDuration: registration.work_duration,
-        breakDuration: registration.break_duration,
-        publicHoliday: registration.public_holiday,
-        numericals: registration.numericals // Assuming numericals is an array of objects
-      }))
-    }
-
-    // Parse the presigned URL to remove any auth headers
-    const presignedUrlObj = new URL(job.presigned_url)
-    const cleanPresignedUrl = presignedUrlObj.toString()
-
-    // Debug logging
-    console.log('Clean Presigned URL:', cleanPresignedUrl)
-    console.log('Request Headers:', {
-      'Content-Type': 'application/json'
-    })
-    console.log('Request Body:', JSON.stringify(formattedDataset, null, 2))
-
-    const response = await fetch(cleanPresignedUrl, {
+    const response = await fetch(job.presigned_url, {
       method: 'PUT',
       headers: {
+        ...authHeaders,
         'Content-Type': 'application/json',
+        'x-amz-acl': 'bucket-owner-full-control'
       },
-      body: JSON.stringify(formattedDataset),
+      body: JSON.stringify(dataset)
     })
 
-    // Log response details
     if (!response.ok) {
       const errorText = await response.text()
-      console.log('Response Status:', response.status)
-      console.log('Response Headers:', Object.fromEntries(response.headers))
-      console.log('Response Error:', errorText)
+      console.error('Upload failed:', errorText)
       throw new Error(`Failed to upload to presigned URL: ${response.statusText}. Status: ${response.status}. Error: ${errorText}`)
     }
 

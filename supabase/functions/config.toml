@@ -1,15 +1,16 @@
 project_id = "myapedwslmipqgngeamd"
 
+[functions.timedetect-health]
+verify_jwt = false
+
+[functions.timedetect-presigned]
+verify_jwt = false
+
+[functions.timedetect-upload]
+verify_jwt = false
+
 [global.env]
 SUPABASE_URL = "env"
 SUPABASE_ANON_KEY = "env"
 SUPABASE_SERVICE_ROLE_KEY = "env"
 SUPABASE_DB_URL = "env"
-
-[[global.functions]]
-name = "timedetect-health"
-verify_jwt = false
-
-[[global.functions]]
-name = "timedetect-presigned"
-verify_jwt = false
