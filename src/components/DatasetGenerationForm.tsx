@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useMemo } from "react";
 import { Button } from "@/components/ui/button";
 import { useToast } from "@/components/ui/use-toast";
 import { TimeRegistration, EmployeeWorkPattern } from "../types/timeRegistration";
@@ -61,47 +61,57 @@ export const DatasetGenerationForm = ({ onGenerate, onClear }: DatasetGeneration
   const [anomalyType, setAnomalyType] = useState<"none" | "weak" | "strong" | "both">("none");
   const [anomalyProbability, setAnomalyProbability] = useState([0.33]);
 
-  // Query to load the dataset
+  // Query to load the dataset with proper caching
   const { data: dataset } = useQuery({
     queryKey: ['dataset'],
-    initialData: INITIAL_DATASET_STATE
+    initialData: INITIAL_DATASET_STATE,
+    staleTime: Infinity,
+    cacheTime: Infinity
   });
 
-  // Load dataset and patterns when component mounts
+  // Memoize pattern extraction
+  const extractedPatterns = useMemo(() => {
+    if (!dataset?.registrations.length) return new Map<string, EmployeeWorkPattern>();
+    
+    const patterns = new Map<string, EmployeeWorkPattern>();
+    const processedEmployees = new Set<string>();
+    
+    dataset.registrations.forEach(reg => {
+      if (!processedEmployees.has(reg.employeeId)) {
+        processedEmployees.add(reg.employeeId);
+        
+        const employeeRegs = dataset.registrations.filter(r => r.employeeId === reg.employeeId);
+        if (employeeRegs.length > 0) {
+          patterns.set(reg.employeeId, {
+            employeeId: reg.employeeId,
+            departmentId: reg.departmentId,
+            allowedStartTimes: [...new Set(employeeRegs.map(r => r.startTime))],
+            allowedEndTimes: [...new Set(employeeRegs.map(r => r.endTime))],
+            allowedBreakDurations: [...new Set(employeeRegs.map(r => r.breakDuration))],
+            allowedWorkCategories: [...new Set(employeeRegs.map(r => r.workCategory))],
+            canWorkWeekends: employeeRegs.some(r => {
+              const date = new Date(r.date);
+              return date.getDay() === 0 || date.getDay() === 6;
+            })
+          });
+        }
+      }
+    });
+    
+    return patterns;
+  }, [dataset?.registrations]);
+
+  // Load dataset and patterns only once when component mounts or when dataset changes
   useEffect(() => {
     if (dataset && dataset.registrations.length > 0) {
-      // Extract patterns from registrations and update pattern cache
-      const patterns = new Map<string, EmployeeWorkPattern>();
-      dataset.registrations.forEach(reg => {
-        if (!patterns.has(reg.employeeId)) {
-          // Find the pattern for this employee from the registrations
-          const employeeRegs = dataset.registrations.filter(r => r.employeeId === reg.employeeId);
-          if (employeeRegs.length > 0) {
-            patterns.set(reg.employeeId, {
-              employeeId: reg.employeeId,
-              departmentId: reg.departmentId,
-              allowedStartTimes: [...new Set(employeeRegs.map(r => r.startTime))],
-              allowedEndTimes: [...new Set(employeeRegs.map(r => r.endTime))],
-              allowedBreakDurations: [...new Set(employeeRegs.map(r => r.breakDuration))],
-              allowedWorkCategories: [...new Set(employeeRegs.map(r => r.workCategory))],
-              canWorkWeekends: employeeRegs.some(r => {
-                const date = new Date(r.date);
-                return date.getDay() === 0 || date.getDay() === 6;
-              })
-            });
-          }
-        }
-      });
-      setPatternCache(patterns);
+      setPatternCache(extractedPatterns);
       
-      // Update form state with dataset values
       if (dataset.startDate) setStartDate(dataset.startDate);
       if (dataset.endDate) setEndDate(dataset.endDate);
       
-      // Call onGenerate to update parent component
       onGenerate(dataset.registrations, dataset.startDate, dataset.endDate);
     }
-  }, [dataset, onGenerate]);
+  }, [dataset, onGenerate, extractedPatterns]);
 
   // Clear pattern cache when clear is triggered
   useEffect(() => {

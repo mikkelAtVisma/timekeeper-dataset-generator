@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useCallback } from "react";
 import { TimeRegistration } from "../types/timeRegistration";
 import { TimeRegistrationTable } from "../components/TimeRegistrationTable";
 import { TimeRegistrationCalendar } from "../components/TimeRegistrationCalendar";
@@ -19,7 +19,9 @@ const Index = () => {
   const [clearTrigger, setClearTrigger] = useState(0);
   const [currentStartDate, setCurrentStartDate] = useState("");
   const [currentEndDate, setCurrentEndDate] = useState("");
-  const [currentSettings, setCurrentSettings] = useState({
+  
+  // Memoize settings to prevent unnecessary re-renders
+  const [currentSettings] = useState({
     numEmployees: 5,
     projects: ["A", "B", "C", "D"],
     workCategories: ["Development", "Testing", "Meetings", "Documentation"],
@@ -40,18 +42,18 @@ const Index = () => {
     }
   });
 
-  const handleGenerateDataset = (newRegistrations: TimeRegistration[], startDate: string, endDate: string) => {
-    setRegistrations((prev) => [...newRegistrations, ...prev]);
+  const handleGenerateDataset = useCallback((newRegistrations: TimeRegistration[], startDate: string, endDate: string) => {
+    setRegistrations(newRegistrations);
     setCurrentStartDate(startDate);
     setCurrentEndDate(endDate);
-  };
+  }, []);
 
-  const handleRegistrationClick = (registration: TimeRegistration, targetView: "list" | "calendar") => {
+  const handleRegistrationClick = useCallback((registration: TimeRegistration, targetView: "list" | "calendar") => {
     setSelectedRegistrationId(registration.registrationId);
     setActiveTab(targetView);
-  };
+  }, []);
 
-  const handleClearDataset = () => {
+  const handleClearDataset = useCallback(() => {
     setRegistrations([]);
     setSelectedRegistrationId(null);
     setClearTrigger(prev => prev + 1);
@@ -61,7 +63,7 @@ const Index = () => {
       title: "Dataset cleared",
       description: "All registrations and patterns have been removed",
     });
-  };
+  }, [toast]);
 
   return (
     <div className="min-h-screen bg-gray-50 py-8">
