@@ -74,7 +74,6 @@ serve(async (req) => {
     const response = await fetch(job.presigned_url, {
       method: 'PUT',
       headers: {
-        ...authHeaders,
         'Content-Type': 'application/json',
       },
       body: JSON.stringify(formattedDataset),
