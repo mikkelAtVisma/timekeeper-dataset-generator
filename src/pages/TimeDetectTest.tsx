@@ -16,6 +16,7 @@ import {
 } from "@/components/ui/table";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { supabase } from "@/integrations/supabase/client";
+import { Json } from "@/integrations/supabase/types";
 
 const TimeDetectTest = () => {
   const { toast } = useToast();
@@ -46,12 +47,41 @@ const TimeDetectTest = () => {
 
     setIsSavingDataset(true);
     try {
-      // Convert the registrations array to a plain object array to ensure proper JSON serialization
-      const serializedRegistrations = dataset.registrations.map(reg => ({
-        ...reg,
-        numericals: reg.numericals || [],
-        employeePattern: reg.employeePattern || null
-      }));
+      // Convert the registrations array to a JSON-compatible format
+      const serializedRegistrations = dataset.registrations.map(reg => {
+        const serializedPattern = reg.employeePattern ? {
+          employeeId: reg.employeePattern.employeeId,
+          allowedStartTimes: reg.employeePattern.allowedStartTimes,
+          allowedEndTimes: reg.employeePattern.allowedEndTimes,
+          allowedBreakDurations: reg.employeePattern.allowedBreakDurations,
+          departmentId: reg.employeePattern.departmentId,
+          allowedWorkCategories: reg.employeePattern.allowedWorkCategories,
+          canWorkWeekends: reg.employeePattern.canWorkWeekends
+        } : null;
+
+        const serializedNumericals = (reg.numericals || []).map(num => ({
+          name: num.name,
+          value: num.value
+        }));
+
+        return {
+          registrationId: reg.registrationId,
+          date: reg.date,
+          employeeId: reg.employeeId,
+          projectId: reg.projectId,
+          departmentId: reg.departmentId,
+          workCategory: reg.workCategory,
+          startTime: reg.startTime,
+          endTime: reg.endTime,
+          workDuration: reg.workDuration,
+          breakDuration: reg.breakDuration,
+          publicHoliday: reg.publicHoliday || false,
+          numericals: serializedNumericals,
+          anomaly: reg.anomaly || null,
+          anomalyField: reg.anomalyField || null,
+          employeePattern: serializedPattern
+        };
+      }) as Json;
 
       const { error } = await supabase
         .from('datasets')
