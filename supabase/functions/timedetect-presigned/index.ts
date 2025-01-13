@@ -1,5 +1,6 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts"
 import { timeDetectAuth } from "../_shared/timeDetectAuth.ts"
+import { createClient } from 'https://esm.sh/@supabase/supabase-js@2'
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
@@ -15,12 +16,16 @@ serve(async (req) => {
   try {
     console.log('Presigned URL requested')
 
+    // Initialize Supabase client
+    const supabaseClient = createClient(
+      Deno.env.get('SUPABASE_URL') ?? '',
+      Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? ''
+    )
+
     // 1. Fetch an auth token for TimeDetect
     const authHeaders = await timeDetectAuth.getAuthHeaders()
 
-    // 2. For demonstration, we'll use a hard-coded tenantId here. 
-    //    Adjust as needed or parse from request (e.g., query string) 
-    //    if different tenants must be supported.
+    // 2. For demonstration, we'll use a hard-coded tenantId here
     const tenantId = "time.reg.benchmark"
 
     // 3. Call the TimeDetect presigned_url endpoint
@@ -29,8 +34,8 @@ serve(async (req) => {
       {
         method: 'GET',
         headers: {
-          ...authHeaders,          // includes Authorization: Bearer <token>
-          tenantId,                // TimeDetect requires a tenantId header
+          ...authHeaders,
+          tenantId,
         },
       }
     )
@@ -40,10 +45,26 @@ serve(async (req) => {
       throw new Error(`Presigned URL request failed: ${errorMsg}`)
     }
 
-    // 4. The response should contain something like { jobId, url }, etc.
+    // 4. Parse the response
     const data = await presignedResponse.json()
+    console.log('Received presigned URL response:', data)
 
-    // 5. Return the data as JSON, along with CORS headers
+    // 5. Store the response in the database
+    const { error: insertError } = await supabaseClient
+      .from('timedetect_jobs')
+      .insert({
+        job_id: data.jobId,
+        presigned_url: data.url,
+        dataset_id: 'default',
+        customer_id: tenantId,
+      })
+
+    if (insertError) {
+      console.error('Error storing job in database:', insertError)
+      throw new Error('Failed to store job in database')
+    }
+
+    // 6. Return the data as JSON, along with CORS headers
     return new Response(JSON.stringify(data), {
       headers: { ...corsHeaders, 'Content-Type': 'application/json' },
       status: 200,

@@ -58,22 +58,6 @@ export class TimeDetectService {
       }
 
       console.log('Presigned URL response:', data);
-
-      // Store the response in the database
-      const { error: insertError } = await supabase
-        .from('timedetect_jobs')
-        .insert({
-          job_id: data.jobId,
-          presigned_url: data.url,
-          dataset_id: 'default', // You might want to make this configurable
-          customer_id: 'time.reg.benchmark', // You might want to make this configurable
-        });
-
-      if (insertError) {
-        console.error('Error storing presigned URL in database:', insertError);
-        throw insertError;
-      }
-
       return data;
     } catch (err) {
       console.error('Error getting presigned URL:', err);
