@@ -54,7 +54,7 @@ serve(async (req) => {
     // 4. Upload the data to the presigned URL with correct headers
     const formattedDataset = {
       datasetId: datasetId,
-      customerId: dataset.customer_id, // Assuming customer_id is a field in your dataset
+      customerId: 'testing', // Assuming customer_id is a field in your dataset
       registrations: dataset.registrations.map(registration => ({
         registrationId: registration.id,
         date: registration.date,
