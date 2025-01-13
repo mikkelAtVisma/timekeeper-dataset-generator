@@ -70,6 +70,7 @@ export const DatasetsTable = () => {
         <Table>
           <TableHeader>
             <TableRow>
+              <TableHead>ID</TableHead>
               <TableHead>Created At</TableHead>
               <TableHead>Start Date</TableHead>
               <TableHead>End Date</TableHead>
@@ -80,19 +81,20 @@ export const DatasetsTable = () => {
           <TableBody>
             {isLoading ? (
               <TableRow>
-                <TableCell colSpan={5} className="text-center py-4 text-gray-500">
+                <TableCell colSpan={6} className="text-center py-4 text-gray-500">
                   Loading datasets...
                 </TableCell>
               </TableRow>
             ) : datasets.length === 0 ? (
               <TableRow>
-                <TableCell colSpan={5} className="text-center py-4 text-gray-500">
+                <TableCell colSpan={6} className="text-center py-4 text-gray-500">
                   No datasets found
                 </TableCell>
               </TableRow>
             ) : (
               datasets.map((dataset) => (
                 <TableRow key={dataset.id}>
+                  <TableCell className="font-mono text-sm">{dataset.id}</TableCell>
                   <TableCell>{formatDate(dataset.created_at)}</TableCell>
                   <TableCell>{formatDate(dataset.start_date)}</TableCell>
                   <TableCell>{formatDate(dataset.end_date)}</TableCell>
