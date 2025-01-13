@@ -5,7 +5,7 @@ interface TokenResponse {
 }
 
 export const timeDetectAuth = {
-  async getAuthHeaders(): Promise<HeadersInit> {
+  async getAuthHeaders(): Promise<Record<string, string>> {
     try {
       const params = new URLSearchParams({
         grant_type: 'client_credentials',
